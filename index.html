@@ -1,0 +1,4655 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vetting Hub | Professional Inspection Management</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Supabase SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+      /* [All the CSS styles remain exactly the same - no changes needed] */
+      @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap");
+
+      :root {
+        --primary-50: #eff6ff;
+        --primary-100: #dbeafe;
+        --primary-200: #bfdbfe;
+        --primary-300: #93c5fd;
+        --primary-400: #60a5fa;
+        --primary-500: #3b82f6;
+        --primary-600: #2563eb;
+        --primary-700: #1d4ed8;
+        --primary-800: #1e40af;
+        --primary-900: #1e3a8a;
+
+        --secondary-50: #f0f9ff;
+        --secondary-100: #e0f2fe;
+        --secondary-200: #bae6fd;
+        --secondary-300: #7dd3fc;
+        --secondary-400: #38bdf8;
+        --secondary-500: #0ea5e9;
+        --secondary-600: #0284c7;
+        --secondary-700: #0369a1;
+        --secondary-800: #075985;
+        --secondary-900: #0c4a6e;
+
+        --accent-50: #fefce8;
+        --accent-100: #fef9c3;
+        --accent-200: #fef08a;
+        --accent-300: #fde047;
+        --accent-400: #facc15;
+        --accent-500: #eab308;
+        --accent-600: #ca8a04;
+        --accent-700: #a16207;
+        --accent-800: #854d0e;
+        --accent-900: #713f12;
+
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-400: #9ca3af;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --gray-900: #111827;
+
+        --success-500: #10b981;
+        --warning-500: #f59e0b;
+        --danger-500: #ef4444;
+      }
+
+      body {
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        margin: 0;
+        padding: 0;
+        color: var(--gray-700);
+        line-height: 1.5;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 600;
+      }
+
+      /* [All other CSS styles remain exactly the same] */
+      /* Enhanced Vertical Menu */
+      .menu-slider {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        width: 260px;
+        background: linear-gradient(
+          180deg,
+          var(--gray-900) 0%,
+          var(--gray-800) 100%
+        );
+        color: white;
+        overflow-y: auto;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1000;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      /* [Rest of CSS remains exactly the same] */
+      .menu-slider::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      .menu-slider::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .menu-slider::-webkit-scrollbar-thumb {
+        background: var(--primary-500);
+        border-radius: 2px;
+      }
+
+      .menu-content {
+        padding: 16px 0;
+      }
+
+      .main-content {
+        margin-left: 260px;
+        padding: 24px;
+        min-height: 100vh;
+        transition: all 0.3s ease;
+      }
+
+      /* Tab Button Styling */
+      .tab-btn {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        text-align: left;
+        padding: 14px 20px;
+        margin: 2px 16px;
+        color: var(--gray-300);
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .tab-btn::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: var(--primary-500);
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+
+      .tab-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: white;
+        transform: translateX(4px);
+      }
+
+      .tab-btn:hover::before {
+        transform: translateX(0);
+      }
+
+      .tab-btn.active {
+        background: rgba(59, 130, 246, 0.15);
+        color: white;
+        font-weight: 600;
+      }
+
+      .tab-btn.active::before {
+        transform: translateX(0);
+      }
+
+      .tab-btn i {
+        margin-right: 12px;
+        width: 20px;
+        text-align: center;
+        font-size: 1.1rem;
+        color: var(--primary-300);
+      }
+
+      .tab-btn.active i {
+        color: white;
+      }
+
+      /* Card Design */
+      .card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        padding: 24px;
+        margin-bottom: 24px;
+        border: 1px solid var(--gray-200);
+        transition: all 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Enhanced Table Container */
+      .table-container {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        margin-bottom: 24px;
+        border: 1px solid var(--gray-200);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+
+      thead {
+        background: linear-gradient(
+          135deg,
+          var(--primary-600) 0%,
+          var(--primary-700) 100%
+        );
+      }
+
+      th {
+        padding: 18px 16px;
+        text-align: left;
+        font-weight: 600;
+        color: white;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        font-family: "Space Grotesk", sans-serif;
+        border-bottom: none;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      /* FIXED: Table header hover - don't change background on hover */
+      thead tr:hover {
+        background: linear-gradient(
+          135deg,
+          var(--primary-600) 0%,
+          var(--primary-700) 100%
+        ) !important;
+      }
+
+      td {
+        padding: 16px;
+        border-bottom: 1px solid var(--gray-100);
+        font-size: 0.875rem;
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      /* FIXED: Only apply hover to table body rows */
+      tbody tr:hover {
+        background-color: var(--primary-50);
+      }
+
+      /* Badge Design */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        line-height: 1;
+      }
+
+      .badge-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+      }
+
+      .badge-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+      }
+
+      .badge-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+      }
+
+      .badge-info {
+        background: linear-gradient(
+          135deg,
+          var(--primary-500) 0%,
+          var(--primary-600) 100%
+        );
+        color: white;
+      }
+
+      .badge-secondary {
+        background: linear-gradient(
+          135deg,
+          var(--secondary-500) 0%,
+          var(--secondary-600) 100%
+        );
+        color: white;
+      }
+
+      /* Button Design */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        font-size: 0.875rem;
+        font-family: "Space Grotesk", sans-serif;
+        letter-spacing: 0.01em;
+      }
+
+      .btn i {
+        margin-right: 8px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(
+          135deg,
+          var(--primary-600) 0%,
+          var(--primary-700) 100%
+        );
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+      }
+
+      .btn-primary:hover {
+        background: linear-gradient(
+          135deg,
+          var(--primary-700) 0%,
+          var(--primary-800) 100%
+        );
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+      }
+
+      .btn-secondary {
+        background: linear-gradient(
+          135deg,
+          var(--secondary-600) 0%,
+          var(--secondary-700) 100%
+        );
+        color: white;
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+      }
+
+      .btn-secondary:hover {
+        background: linear-gradient(
+          135deg,
+          var(--secondary-700) 0%,
+          var(--secondary-800) 100%
+        );
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(14, 165, 233, 0.35);
+      }
+
+      .btn-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      }
+
+      .btn-success:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+      }
+
+      .btn-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+      }
+
+      .btn-danger:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+      }
+
+      .btn-outline {
+        background: transparent;
+        color: var(--primary-600);
+        border: 2px solid var(--primary-200);
+      }
+
+      .btn-outline:hover {
+        background: var(--primary-50);
+        border-color: var(--primary-300);
+      }
+
+      /* Form Controls */
+      .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid var(--gray-200);
+        border-radius: 10px;
+        font-size: 0.875rem;
+        font-family: "Plus Jakarta Sans", sans-serif;
+        transition: all 0.2s ease;
+        background: white;
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: var(--primary-500);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        background: white;
+      }
+
+      .form-control.is-invalid {
+        border-color: var(--danger-500);
+        background: linear-gradient(to right, #fef2f2, white);
+      }
+
+      .form-control.is-valid {
+        border-color: var(--success-500);
+        background: linear-gradient(to right, #f0fdf4, white);
+      }
+
+      .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--gray-700);
+        font-size: 0.875rem;
+        font-family: "Space Grotesk", sans-serif;
+      }
+
+      .form-helper {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.75rem;
+        color: var(--gray-500);
+      }
+
+      .form-error {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.75rem;
+        color: var(--danger-500);
+        font-weight: 500;
+      }
+
+      /* Menu Toggle */
+      .menu-toggle {
+        display: none;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1100;
+        background: linear-gradient(
+          135deg,
+          var(--primary-600) 0%,
+          var(--primary-700) 100%
+        );
+        color: white;
+        border: none;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+      }
+
+      .menu-toggle:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Menu Logo */
+      .menu-logo {
+        padding: 24px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 16px;
+        text-align: center;
+      }
+
+      .menu-logo h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-family: "Space Grotesk", sans-serif;
+        background: linear-gradient(
+          135deg,
+          #ffffff 0%,
+          var(--primary-200) 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .menu-logo p {
+        font-size: 0.75rem;
+        opacity: 0.7;
+        margin-top: 8px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      /* Priority Styles */
+      .priority-expired {
+        background: linear-gradient(to right, #fef2f2, white) !important;
+        border-left: 4px solid var(--danger-500);
+      }
+
+      .priority-critical {
+        background: linear-gradient(to right, #fef3c7, white) !important;
+        border-left: 4px solid var(--accent-500);
+      }
+
+      .priority-high {
+        background: linear-gradient(to right, #ffedd5, white) !important;
+        border-left: 4px solid #f97316;
+      }
+
+      .priority-medium {
+        background: linear-gradient(
+          to right,
+          var(--primary-50),
+          white
+        ) !important;
+        border-left: 4px solid var(--primary-500);
+      }
+
+      .priority-low {
+        background: linear-gradient(to right, #ecfdf5, white) !important;
+        border-left: 4px solid var(--success-500);
+      }
+
+      /* Tab Content Animation */
+      .tab-content {
+        animation: fadeIn 0.4s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Modal */
+      .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        animation: fadeIn 0.2s ease;
+        backdrop-filter: blur(4px);
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        animation: slideUp 0.3s ease;
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Observation Items */
+      .observation-item {
+        border-left: 4px solid var(--primary-500);
+        background: linear-gradient(to right, var(--primary-50), white);
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .observation-item::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: currentColor;
+        opacity: 0.2;
+      }
+
+      .observation-item.HM {
+        border-left-color: var(--accent-500);
+        background: linear-gradient(to right, #fef3c7, white);
+        color: var(--accent-700);
+      }
+
+      .observation-item.H {
+        border-left-color: var(--danger-500);
+        background: linear-gradient(to right, #fef2f2, white);
+        color: var(--danger-700);
+      }
+
+      .observation-item.P {
+        border-left-color: var(--primary-500);
+        background: linear-gradient(to right, var(--primary-50), white);
+        color: var(--primary-700);
+      }
+
+      .observation-item.PH {
+        border-left-color: var(--success-500);
+        background: linear-gradient(to right, #ecfdf5, white);
+        color: var(--success-700);
+      }
+
+      /* Status Indicators */
+      .status-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+
+      .status-dot.success {
+        background-color: var(--success-500);
+        animation: pulse 2s infinite;
+      }
+
+      .status-dot.warning {
+        background-color: var(--warning-500);
+        animation: pulse 2s infinite;
+      }
+
+      .status-dot.danger {
+        background-color: var(--danger-500);
+        animation: pulse 1s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      /* Mobile Responsiveness */
+      @media (max-width: 1024px) {
+        .menu-slider {
+          transform: translateX(-100%);
+          width: 280px;
+        }
+
+        .menu-slider.active {
+          transform: translateX(0);
+          box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .main-content {
+          margin-left: 0;
+          padding: 20px;
+        }
+
+        .menu-toggle {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .menu-slider::after {
+          content: "";
+          position: fixed;
+          top: 0;
+          left: 280px;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(2px);
+          z-index: -1;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .menu-slider.active::after {
+          opacity: 1;
+        }
+
+        .table-container {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+          min-width: 800px;
+        }
+
+        th,
+        td {
+          padding: 14px 12px;
+          font-size: 0.8125rem;
+        }
+
+        .btn {
+          padding: 10px 16px;
+          font-size: 0.8125rem;
+        }
+
+        .card {
+          padding: 20px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .main-content {
+          padding: 16px;
+        }
+
+        h1 {
+          font-size: 1.75rem;
+        }
+
+        h2 {
+          font-size: 1.5rem;
+        }
+
+        .btn {
+          padding: 10px 14px;
+        }
+
+        .form-control {
+          padding: 10px 14px;
+        }
+
+        .grid {
+          gap: 16px;
+        }
+      }
+
+      /* Search Container */
+      .search-container {
+        position: relative;
+      }
+
+      .search-container i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray-400);
+        z-index: 1;
+      }
+
+      .search-container input {
+        padding-left: 44px;
+      }
+
+      /* Empty State */
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--gray-500);
+      }
+
+      .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 16px;
+        color: var(--gray-300);
+        opacity: 0.5;
+      }
+
+      .empty-state h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 8px;
+      }
+
+      .empty-state p {
+        font-size: 0.875rem;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      /* Section Headers */
+      .section-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+        gap: 16px;
+      }
+
+      .section-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        font-family: "Space Grotesk", sans-serif;
+        margin: 0;
+      }
+
+      .section-subtitle {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+        margin-top: 8px;
+        font-weight: 400;
+      }
+
+      /* Toast Notification */
+      .toast {
+        position: fixed;
+        bottom: 32px;
+        right: 32px;
+        background: var(--gray-900);
+        color: white;
+        padding: 16px 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        z-index: 2000;
+        animation: slideInRight 0.3s ease;
+        max-width: 400px;
+      }
+
+      @keyframes slideInRight {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      .toast i {
+        margin-right: 12px;
+        font-size: 1.25rem;
+      }
+
+      .toast.success {
+        background: linear-gradient(
+          135deg,
+          var(--success-500) 0%,
+          #059669 100%
+        );
+      }
+
+      .toast.error {
+        background: linear-gradient(135deg, var(--danger-500) 0%, #dc2626 100%);
+      }
+
+      .toast.warning {
+        background: linear-gradient(
+          135deg,
+          var(--warning-500) 0%,
+          #d97706 100%
+        );
+      }
+
+      .toast.info {
+        background: linear-gradient(
+          135deg,
+          var(--primary-500) 0%,
+          var(--primary-600) 100%
+        );
+      }
+
+      /* Password Protection */
+      .password-protected {
+        position: relative;
+      }
+
+      .password-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(5px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        border-radius: 16px;
+      }
+
+      .password-form {
+        background: white;
+        padding: 32px;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        width: 90%;
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--gray-100);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--gray-400);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--gray-500);
+      }
+      /* Add these styles to the existing CSS */
+
+      /* Copy button animation */
+      @keyframes pulseCopy {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .btn-copy-success {
+        animation: pulseCopy 0.5s ease;
+        background: linear-gradient(
+          135deg,
+          #10b981 0%,
+          #059669 100%
+        ) !important;
+        color: white !important;
+      }
+
+      /* Observation details styling */
+      .observation-detail-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .observation-field {
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 8px;
+        padding: 12px;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+      }
+
+      .observation-field-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--gray-500);
+        margin-bottom: 4px;
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 600;
+      }
+
+      .observation-field-value {
+        font-size: 0.875rem;
+        color: var(--gray-700);
+        line-height: 1.4;
+      }
+
+      /* Email Alert Modal */
+      .email-modal {
+        max-width: 600px;
+      }
+
+      .email-recipient-chip {
+        display: inline-flex;
+        align-items: center;
+        background: var(--primary-100);
+        color: var(--primary-700);
+        padding: 4px 12px;
+        border-radius: 20px;
+        margin: 2px;
+        font-size: 0.875rem;
+      }
+
+      .email-recipient-chip button {
+        margin-left: 6px;
+        background: none;
+        border: none;
+        color: var(--primary-500);
+        cursor: pointer;
+        font-size: 1rem;
+      }
+
+      .email-preview {
+        background: var(--gray-50);
+        border: 1px solid var(--gray-200);
+        border-radius: 8px;
+        padding: 16px;
+        max-height: 300px;
+        overflow-y: auto;
+        font-family: monospace;
+        font-size: 0.875rem;
+        white-space: pre-wrap;
+      }
+    </style>
+    <script>
+      // Supabase configuration
+      const SUPABASE_URL = "https://bgavfnxvplhsthazzdbc.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnYXZmbnh2cGxoc3RoYXp6ZGJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyODY4MDgsImV4cCI6MjA4MDg2MjgwOH0.SM6BI0sWliTkAwDCqybS5kFbdVnFdX-xn4VZrU9tMJ8";
+
+      // Initialize Supabase client
+      const supabase = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+
+      // Constants
+      const LS_KEY = "vettingInspections";
+      const LS_TC_KEY = "vesselTCs";
+      const LS_EMAILS_KEY = "alertEmails";
+      const OBS_CATEGORIES = ["Hardware", "Process", "Human", "Photographs"];
+      const DATA_MGMT_PASSWORD = "admin";
+      const DEFAULT_EMAIL_RECIPIENTS = [
+        "operations@company.com",
+        "safety@company.com",
+        "technical@company.com",
+      ];
+
+      // CHANGED: Initial TC Data - updated with the provided list
+      const INITIAL_TCS = {
+        "High Trader": "Spot",
+        "High Trust": "Valaro",
+        "High Challenge": "Spot",
+        "High Discovery": "Aramco",
+        "High Tide": "Reliance",
+        "High Seas": "Antiles",
+        "Cielo Di Gaeta": "Total",
+        "High Wind": "Valaro",
+        "High Fidelity": "BP",
+        "High Voyager": "Spot",
+        "Cielo Di Salerno": "NAYALA",
+        "High Freedom ": "Total",
+        "High Loyalty": "P66",
+        "High Adventurer": "Total",
+        "Cielo Bianco": "Braskem",
+        "Cielo Di Rotterdam": "Spot",
+        "Cielo Di Cagliari": "Spot",
+        "Cielo Di Capri": "CEPSA",
+        "Cielo Di New York": "Spot",
+        "Cielo Di Ulsan": "Spot",
+        "Cielo Di Hanoi": "Spot",
+        "High Navigator": "Spot",
+        "High Leader": "Spot",
+      };
+
+      // CHANGED: Initial Inspection Data - REMOVED all sample data
+      const INITIAL_INSPECTIONS = [];
+      // Removed all sample inspection data as requested
+
+      // Global State
+      let inspections = [];
+      let vesselTCs = {};
+      let dataMgmtUnlocked = false;
+      let obsChart = null;
+      let alertEmailRecipients = [];
+
+      // Supabase Service Class
+      class SupabaseService {
+        constructor() {
+          this.isConnected = false;
+        }
+
+        async checkConnection() {
+          try {
+            const { data, error } = await supabase
+              .from("inspections")
+              .select("count")
+              .limit(1);
+            this.isConnected = !error;
+            return this.isConnected;
+          } catch (error) {
+            this.isConnected = false;
+            return false;
+          }
+        }
+
+        async saveInspection(inspection) {
+          try {
+            const supabaseData = {
+              local_id: inspection.id,
+              vessel_name: inspection.vesselName,
+              tc: inspection.tc,
+              inspection_date: inspection.date,
+              quarter: inspection.qtr,
+              oil_major: inspection.oilMajor,
+              port: inspection.port,
+              inspector: inspection.inspector,
+              sire_due_date: inspection.sireDueDate,
+              observations: inspection.observations || [],
+            };
+
+            const { data: existing } = await supabase
+              .from("inspections")
+              .select("id")
+              .eq("local_id", inspection.id)
+              .single();
+
+            let result;
+            if (existing) {
+              const { data, error } = await supabase
+                .from("inspections")
+                .update(supabaseData)
+                .eq("id", existing.id)
+                .select()
+                .single();
+              if (error) throw error;
+              result = data;
+            } else {
+              const { data, error } = await supabase
+                .from("inspections")
+                .insert([supabaseData])
+                .select()
+                .single();
+              if (error) throw error;
+              result = data;
+            }
+
+            inspection.supabaseId = result.id;
+            return { success: true, data: result };
+          } catch (error) {
+            return { success: false, error: error.message };
+          }
+        }
+
+        async deleteInspection(inspection) {
+          try {
+            if (inspection.supabaseId) {
+              const { error } = await supabase
+                .from("inspections")
+                .delete()
+                .eq("id", inspection.supabaseId);
+              if (error) throw error;
+              return { success: true };
+            }
+            return { success: false, error: "No Supabase ID" };
+          } catch (error) {
+            return { success: false, error: error.message };
+          }
+        }
+
+        async loadAllInspections() {
+          try {
+            const { data, error } = await supabase
+              .from("inspections")
+              .select("*")
+              .order("inspection_date", { ascending: false });
+
+            if (error) throw error;
+
+            const localData = data.map((item) => ({
+              id: item.local_id || item.id,
+              supabaseId: item.id,
+              vesselName: item.vessel_name,
+              tc: item.tc,
+              date: item.inspection_date,
+              qtr: item.quarter,
+              oilMajor: item.oil_major,
+              port: item.port,
+              inspector: item.inspector,
+              sireDueDate: item.sire_due_date,
+              observations: item.observations || [],
+              createdAt: item.created_at,
+            }));
+
+            return { success: true, data: localData };
+          } catch (error) {
+            return { success: false, error: error.message, data: [] };
+          }
+        }
+
+        async saveVesselTC(vesselName, tcCode) {
+          try {
+            const { data, error } = await supabase
+              .from("vessel_codes")
+              .upsert({ vessel_name: vesselName, tanker_code: tcCode })
+              .select()
+              .single();
+
+            if (error) throw error;
+            return { success: true, data };
+          } catch (error) {
+            return { success: false, error: error.message };
+          }
+        }
+
+        async loadAllVesselTCs() {
+          try {
+            const { data, error } = await supabase
+              .from("vessel_codes")
+              .select("*");
+
+            if (error) throw error;
+
+            const tcs = {};
+            data.forEach((item) => {
+              tcs[item.vessel_name] = item.tanker_code;
+            });
+
+            return { success: true, data: tcs };
+          } catch (error) {
+            return { success: false, error: error.message, data: {} };
+          }
+        }
+
+        subscribeToChanges(callback) {
+          return supabase
+            .channel("inspections-changes")
+            .on(
+              "postgres_changes",
+              { event: "*", schema: "public", table: "inspections" },
+              callback
+            )
+            .subscribe();
+        }
+      }
+
+      // Initialize Supabase service
+      const supabaseService = new SupabaseService();
+
+      // Toast Notification
+      function showToast(message, type = "info") {
+        const toast = document.getElementById("toast");
+        const toastIcon = document.getElementById("toast-icon");
+        const toastMessage = document.getElementById("toast-message");
+
+        toast.className = "toast";
+
+        switch (type) {
+          case "success":
+            toast.classList.add("success");
+            toastIcon.className = "fas fa-check-circle";
+            break;
+          case "error":
+            toast.classList.add("error");
+            toastIcon.className = "fas fa-exclamation-circle";
+            break;
+          case "warning":
+            toast.classList.add("warning");
+            toastIcon.className = "fas fa-exclamation-triangle";
+            break;
+          default:
+            toast.classList.add("info");
+            toastIcon.className = "fas fa-info-circle";
+        }
+
+        toastMessage.textContent = message;
+        toast.classList.remove("hidden");
+
+        setTimeout(() => {
+          toast.classList.add("hidden");
+        }, 4000);
+      }
+
+      // Utility Functions
+      function calculateQTR(dateStr) {
+        const date = new Date(dateStr);
+        const month = date.getMonth() + 1;
+        if (month >= 1 && month <= 3) return "QTR1";
+        if (month >= 4 && month <= 6) return "QTR2";
+        if (month >= 7 && month <= 9) return "QTR3";
+        return "QTR4";
+      }
+
+      function calculateSireDueDate(inspectionDateStr) {
+        const date = new Date(inspectionDateStr);
+        const due = new Date(date);
+        due.setMonth(due.getMonth() + 6);
+        return due.toISOString().split("T")[0];
+      }
+
+      function formatDate(dateStr) {
+        if (!dateStr) return "-";
+        const date = new Date(dateStr);
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+        return `${day}.${month}.${year}`;
+      }
+
+      function formatDateForInput(dateStr) {
+        const date = new Date(dateStr);
+        return date.toISOString().split("T")[0];
+      }
+
+      function generateId() {
+        return Date.now().toString();
+      }
+
+      function getCategoryCode(category) {
+        const codes = {
+          Hardware: "H",
+          Process: "P",
+          Human: "HM",
+          Photographs: "PH",
+        };
+        return codes[category] || category.substring(0, 2).toUpperCase();
+      }
+
+      // Initialize Data
+      async function initData() {
+        let loadedFromCloud = false;
+
+        // Load alert email recipients from localStorage
+        const storedEmails = localStorage.getItem(LS_EMAILS_KEY);
+        alertEmailRecipients = storedEmails
+          ? JSON.parse(storedEmails)
+          : DEFAULT_EMAIL_RECIPIENTS;
+
+        if (await supabaseService.checkConnection()) {
+          const tcResult = await supabaseService.loadAllVesselTCs();
+          if (tcResult.success && Object.keys(tcResult.data).length > 0) {
+            vesselTCs = tcResult.data;
+            loadedFromCloud = true;
+          }
+
+          const inspResult = await supabaseService.loadAllInspections();
+          if (inspResult.success && inspResult.data.length > 0) {
+            inspections = inspResult.data;
+            loadedFromCloud = true;
+            localStorage.setItem(LS_KEY, JSON.stringify(inspections));
+            localStorage.setItem(LS_TC_KEY, JSON.stringify(vesselTCs));
+          }
+        }
+
+        if (!loadedFromCloud) {
+          const storedTCs = localStorage.getItem(LS_TC_KEY);
+          vesselTCs = storedTCs ? JSON.parse(storedTCs) : INITIAL_TCS;
+
+          const storedInspections = localStorage.getItem(LS_KEY);
+          inspections = storedInspections
+            ? JSON.parse(storedInspections)
+            : INITIAL_INSPECTIONS;
+
+          localStorage.setItem(LS_TC_KEY, JSON.stringify(vesselTCs));
+          localStorage.setItem(LS_KEY, JSON.stringify(inspections));
+        }
+
+        updateDashboardCount();
+        updateSyncStatus();
+        return loadedFromCloud ? "cloud" : "local";
+      }
+
+      function updateDashboardCount() {
+        const countElement = document.getElementById("total-count");
+        if (countElement) {
+          countElement.textContent = inspections.length;
+        }
+      }
+
+      // Sync Functions
+      async function syncLocalToSupabase() {
+        for (const [vesselName, tcCode] of Object.entries(vesselTCs)) {
+          await supabaseService.saveVesselTC(vesselName, tcCode);
+        }
+
+        let syncedCount = 0;
+        for (const inspection of inspections) {
+          const result = await supabaseService.saveInspection(inspection);
+          if (result.success) {
+            syncedCount++;
+          }
+        }
+        return syncedCount;
+      }
+
+      async function syncSupabaseToLocal() {
+        const tcResult = await supabaseService.loadAllVesselTCs();
+        const inspResult = await supabaseService.loadAllInspections();
+
+        if (tcResult.success && inspResult.success) {
+          vesselTCs = tcResult.data;
+          inspections = inspResult.data;
+          localStorage.setItem(LS_TC_KEY, JSON.stringify(vesselTCs));
+          localStorage.setItem(LS_KEY, JSON.stringify(inspections));
+          showToast(
+            `Synced ${inspections.length} inspections from cloud`,
+            "success"
+          );
+          return true;
+        }
+        return false;
+      }
+
+      // Sync Status Management
+      function updateSyncStatus() {
+        const indicator = document.getElementById("sync-indicator");
+        const statusText = document.getElementById("sync-status-text");
+        const details = document.getElementById("sync-details");
+
+        if (!indicator || !statusText) return;
+
+        const syncedCount = inspections.filter(
+          (insp) => insp.supabaseId
+        ).length;
+        const totalCount = inspections.length;
+
+        if (supabaseService.isConnected) {
+          indicator.className = "w-3 h-3 rounded-full bg-green-500";
+          statusText.textContent = `Cloud connected`;
+
+          if (totalCount > 0) {
+            const syncPercentage = Math.round((syncedCount / totalCount) * 100);
+            details.textContent = `${syncedCount}/${totalCount} synced (${syncPercentage}%)`;
+
+            if (syncPercentage === 100) {
+              indicator.className = "w-3 h-3 rounded-full bg-green-500";
+            } else if (syncPercentage > 50) {
+              indicator.className = "w-3 h-3 rounded-full bg-yellow-500";
+            } else {
+              indicator.className = "w-3 h-3 rounded-full bg-red-500";
+            }
+          } else {
+            details.textContent = "No inspections";
+          }
+        } else {
+          indicator.className = "w-3 h-3 rounded-full bg-gray-400";
+          statusText.textContent = "Offline mode";
+          details.textContent = "Using local storage only";
+        }
+      }
+
+      // Tab Navigation
+      function switchTab(tabId) {
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((el) => el.classList.add("hidden"));
+        document.getElementById(tabId).classList.remove("hidden");
+
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        const tabButton = document.querySelector(
+          `.tab-btn[data-tab="${tabId}"]`
+        );
+        if (tabButton) tabButton.classList.add("active");
+
+        if (window.innerWidth <= 1024) {
+          const menuSlider = document.getElementById("menuSlider");
+          if (menuSlider) menuSlider.classList.remove("active");
+        }
+
+        switch (tabId) {
+          case "dashboard":
+            renderDashboard();
+            break;
+          case "planner":
+            renderPlanner();
+            break;
+          case "monthly-view":
+            renderMonthlyView();
+            break;
+          case "obs-breakdown":
+            renderObsBreakdown();
+            break;
+          case "analysis":
+            renderAnalysis();
+            break;
+          case "add-inspection":
+            resetForm();
+            break;
+          case "data-mgmt":
+            if (!dataMgmtUnlocked) {
+              document
+                .getElementById("password-overlay")
+                .classList.remove("hidden");
+              document
+                .getElementById("data-management-content")
+                .classList.add("hidden");
+            } else {
+              renderEmailRecipients();
+            }
+            break;
+        }
+      }
+
+      // Dashboard Functions
+      function renderDashboard(filteredInspections = inspections) {
+        const tbody = document.getElementById("dashboard-table-body");
+        const filterCount = document.getElementById("filter-count");
+        const sortSelect = document.getElementById("sort-select");
+
+        if (!tbody || !filterCount || !sortSelect) return;
+
+        let sortedInspections = [...filteredInspections];
+        const sortValue = sortSelect.value;
+
+        switch (sortValue) {
+          case "date-desc":
+            sortedInspections.sort(
+              (a, b) => new Date(b.date) - new Date(a.date)
+            );
+            break;
+          case "date-asc":
+            sortedInspections.sort(
+              (a, b) => new Date(a.date) - new Date(b.date)
+            );
+            break;
+          case "vessel":
+            sortedInspections.sort((a, b) =>
+              a.vesselName.localeCompare(b.vesselName)
+            );
+            break;
+          case "observations":
+            sortedInspections.sort(
+              (a, b) => b.observations.length - a.observations.length
+            );
+            break;
+        }
+
+        tbody.innerHTML = "";
+        filterCount.textContent = sortedInspections.length;
+
+        if (sortedInspections.length === 0) {
+          tbody.innerHTML = `
+                  <tr>
+                    <td colspan="6" class="text-center py-12">
+                      <div class="empty-state">
+                        <i class="fas fa-search text-4xl mb-4"></i>
+                        <h3 class="font-medium text-gray-700 mb-2">No inspections found</h3>
+                        <p class="text-gray-500">Try adjusting your search or add a new inspection</p>
+                        <button onclick="switchTab('add-inspection')" class="btn btn-primary mt-4">
+                          <i class="fas fa-plus mr-2"></i> Add Inspection
+                        </button>
+                      </div>
+                    </td>
+                  </tr>`;
+          return;
+        }
+
+        sortedInspections.forEach((insp) => {
+          const obsCount = insp.observations ? insp.observations.length : 0;
+          const row = document.createElement("tr");
+          row.innerHTML = `
+                  <td class="font-medium">
+                    <div class="flex items-center">
+                      <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-ship text-primary-600"></i>
+                      </div>
+                      <div>
+                        <div class="font-semibold">${insp.vesselName}</div>
+                        <div class="text-xs text-gray-500">${insp.tc}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="font-medium">${formatDate(insp.date)}</div>
+                    <div class="badge badge-secondary">${insp.qtr}</div>
+                  </td>
+                  <td>
+                    <div class="flex items-center">
+                      <i class="fas fa-gas-pump text-gray-400 mr-2"></i>
+                      <span class="font-medium">${insp.oilMajor}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="font-medium">${insp.port}</div>
+                    <div class="text-xs text-gray-500">${insp.inspector}</div>
+                  </td>
+                  <td class="text-center">
+                    <div class="flex items-center justify-center">
+                      <span class="badge ${
+                        obsCount > 0 ? "badge-danger" : "badge-success"
+                      }">
+                        ${obsCount} ${obsCount === 1 ? "obs" : "obs"}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <div class="flex gap-2 justify-center">
+                      <button onclick="viewInspection('${
+                        insp.id
+                      }')" class="btn btn-outline text-xs px-3 py-2">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button onclick="editInspection('${
+                        insp.id
+                      }')" class="btn btn-outline text-xs px-3 py-2">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button onclick="deleteInspection('${
+                        insp.id
+                      }')" class="btn btn-outline text-xs px-3 py-2">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                `;
+          tbody.appendChild(row);
+        });
+      }
+
+      function filterDashboard() {
+        const filterInput = document.getElementById("filter-text");
+        if (!filterInput) return;
+
+        const filterText = filterInput.value.toLowerCase().trim();
+        if (!filterText) {
+          renderDashboard(inspections);
+          return;
+        }
+
+        const filtered = inspections.filter((insp) => {
+          const vesselMatch = insp.vesselName
+            .toLowerCase()
+            .includes(filterText);
+          const tcMatch = insp.tc.toLowerCase().includes(filterText);
+          const dateMatch = formatDate(insp.date)
+            .toLowerCase()
+            .includes(filterText);
+          const oilMajorMatch = insp.oilMajor
+            .toLowerCase()
+            .includes(filterText);
+          const portMatch = insp.port.toLowerCase().includes(filterText);
+          const inspectorMatch = insp.inspector
+            .toLowerCase()
+            .includes(filterText);
+          const obsMatch = insp.observations.some(
+            (obs) =>
+              obs.description.toLowerCase().includes(filterText) ||
+              obs.category.toLowerCase().includes(filterText)
+          );
+
+          return (
+            vesselMatch ||
+            tcMatch ||
+            dateMatch ||
+            oilMajorMatch ||
+            portMatch ||
+            inspectorMatch ||
+            obsMatch
+          );
+        });
+
+        renderDashboard(filtered);
+      }
+
+      async function deleteInspection(id) {
+        if (
+          confirm(
+            "Are you sure you want to delete this inspection? This action cannot be undone."
+          )
+        ) {
+          const inspection = inspections.find((insp) => insp.id === id);
+          const updatedInspections = inspections.filter(
+            (insp) => insp.id !== id
+          );
+
+          if (inspection && supabaseService.isConnected) {
+            await supabaseService.deleteInspection(inspection);
+          }
+
+          inspections = updatedInspections;
+          localStorage.setItem(LS_KEY, JSON.stringify(inspections));
+          if (supabaseService.isConnected) {
+            await syncLocalToSupabase();
+          }
+
+          showToast("Inspection deleted successfully", "success");
+          renderDashboard();
+        }
+      }
+
+      // Add Inspection Form Functions
+      function setupVesselSelect() {
+        const select = document.getElementById("vesselName");
+        if (!select) return;
+
+        select.innerHTML = '<option value="">Select Vessel</option>';
+        Object.keys(vesselTCs).forEach((vessel) => {
+          const option = document.createElement("option");
+          option.value = vessel;
+          option.textContent = vessel;
+          select.appendChild(option);
+        });
+
+        select.addEventListener("change", (e) => {
+          const tcInput = document.getElementById("tc");
+          if (tcInput) {
+            tcInput.value = vesselTCs[e.target.value] || "";
+          }
+        });
+
+        const dateInput = document.getElementById("date");
+        if (dateInput) {
+          dateInput.addEventListener("change", (e) => {
+            const qtrInput = document.getElementById("qtr");
+            if (qtrInput && e.target.value) {
+              qtrInput.value = calculateQTR(e.target.value);
+            }
+          });
+        }
+      }
+
+      function getObservationTemplate(obsData = {}) {
+        const obsNo = obsData.obsNo || "";
+        const category = obsData.category || OBS_CATEGORIES[0];
+        const description = obsData.description || "";
+        const immediateCause = obsData.immediateCause || "";
+        const rootCause = obsData.rootCause || "";
+        const correctiveAction = obsData.correctiveAction || "";
+        const preventiveAction = obsData.preventiveAction || "";
+        const remarks = obsData.remarks || "";
+
+        const categoryOptions = OBS_CATEGORIES.map(
+          (cat) =>
+            `<option value="${cat}" ${
+              cat === category ? "selected" : ""
+            }>${cat}</option>`
+        ).join("");
+
+        return `
+                <div class="observation-item ${getCategoryCode(
+                  category
+                )} p-5 rounded-xl space-y-4 relative">
+                  <button type="button" class="remove-obs-btn absolute top-4 right-4 text-gray-400 hover:text-red-500 font-bold text-lg transition">
+                    <i class="fas fa-times"></i>
+                  </button>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="form-label">Observation Number</label>
+                      <input type="text" name="obsNo" value="${obsNo}" placeholder="e.g., 5.11" class="form-control">
+                    </div>
+                    <div>
+                      <label class="form-label">Category</label>
+                      <select name="category" class="form-control">
+                        ${categoryOptions}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="form-label">Description</label>
+                    <textarea name="description" rows="3" class="form-control" placeholder="Detailed observation description">${description}</textarea>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="form-label">Immediate Cause</label>
+                      <textarea name="immediateCause" rows="2" class="form-control" placeholder="What directly caused the observation?">${immediateCause}</textarea>
+                    </div>
+                    <div>
+                      <label class="form-label">Root Cause</label>
+                      <textarea name="rootCause" rows="2" class="form-control" placeholder="What is the underlying cause?">${rootCause}</textarea>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="form-label">Corrective Action</label>
+                      <textarea name="correctiveAction" rows="2" class="form-control" placeholder="Action to fix the issue">${correctiveAction}</textarea>
+                    </div>
+                    <div>
+                      <label class="form-label">Preventive Action</label>
+                      <textarea name="preventiveAction" rows="2" class="form-control" placeholder="Action to prevent recurrence">${preventiveAction}</textarea>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="form-label">Remarks</label>
+                    <textarea name="remarks" rows="2" class="form-control" placeholder="Additional notes or comments">${remarks}</textarea>
+                  </div>
+                </div>
+              `;
+      }
+
+      function addObservation(obsData = {}) {
+        const container = document.getElementById("observations-container");
+        const noObsMessage = document.getElementById("no-obs-message");
+
+        if (!container) return;
+
+        if (noObsMessage) noObsMessage.style.display = "none";
+
+        const newObsDiv = document.createElement("div");
+        newObsDiv.innerHTML = getObservationTemplate(obsData);
+        container.appendChild(newObsDiv.firstElementChild);
+      }
+
+      function markAsNil() {
+        const container = document.getElementById("observations-container");
+        const noObsMessage = document.getElementById("no-obs-message");
+
+        if (!container) return;
+
+        container.innerHTML = "";
+
+        if (noObsMessage) {
+          noObsMessage.style.display = "block";
+          noObsMessage.innerHTML = `
+                  <i class="fas fa-check-circle text-4xl text-green-500 mb-4"></i>
+                  <h4 class="font-medium text-gray-700 mb-2">Marked as NIL (No Observations)</h4>
+                  <p class="text-gray-500 text-sm">This inspection has no observations</p>
+                  <button type="button" onclick="addObservation()" class="btn btn-outline mt-4">
+                    <i class="fas fa-plus mr-2"></i> Add Observation Anyway
+                  </button>
+                `;
+        }
+
+        showToast("Marked as NIL (No Observations)", "success");
+      }
+
+      function removeObservation(button) {
+        const container = document.getElementById("observations-container");
+        const noObsMessage = document.getElementById("no-obs-message");
+
+        if (!container || !button) return;
+
+        button.closest(".observation-item").remove();
+
+        if (container.children.length === 0 && noObsMessage) {
+          noObsMessage.style.display = "block";
+          noObsMessage.innerHTML = `
+                  <i class="fas fa-clipboard-check text-4xl text-gray-300 mb-4"></i>
+                  <h4 class="font-medium text-gray-700 mb-2">No observations added</h4>
+                  <p class="text-gray-500 text-sm">Click "Add Observation" to include inspection findings or "Mark as NIL" if there are no observations</p>
+                `;
+        }
+      }
+
+      async function handleFormSubmission(event) {
+        event.preventDefault();
+
+        const requiredFields = [
+          "vesselName",
+          "date",
+          "oilMajor",
+          "port",
+          "inspector",
+        ];
+        let isValid = true;
+
+        requiredFields.forEach((fieldId) => {
+          const field = document.getElementById(fieldId);
+          const errorElement = document.getElementById(`${fieldId}-error`);
+
+          if (!field || !field.value.trim()) {
+            if (errorElement)
+              errorElement.textContent = "This field is required";
+            if (field) field.classList.add("is-invalid");
+            isValid = false;
+          } else {
+            if (errorElement) errorElement.textContent = "";
+            field.classList.remove("is-invalid");
+          }
+        });
+
+        if (!isValid) {
+          showToast("Please fill in all required fields", "error");
+          return;
+        }
+
+        const form = document.getElementById("inspection-form");
+        const isEditing = form.dataset.editingId;
+
+        const formData = {
+          vesselName: document.getElementById("vesselName").value,
+          tc: document.getElementById("tc").value,
+          date: document.getElementById("date").value,
+          oilMajor: document.getElementById("oilMajor").value,
+          port: document.getElementById("port").value,
+          inspector: document.getElementById("inspector").value,
+          observations: [],
+        };
+
+        formData.qtr = calculateQTR(formData.date);
+        formData.sireDueDate = calculateSireDueDate(formData.date);
+
+        const obsItems = document.querySelectorAll(".observation-item");
+        obsItems.forEach((item) => {
+          const category = item.querySelector('[name="category"]').value;
+          formData.observations.push({
+            obsNo: item.querySelector('[name="obsNo"]').value,
+            category: category,
+            description: item.querySelector('[name="description"]').value,
+            immediateCause: item.querySelector('[name="immediateCause"]').value,
+            rootCause: item.querySelector('[name="rootCause"]').value,
+            correctiveAction: item.querySelector('[name="correctiveAction"]')
+              .value,
+            preventiveAction: item.querySelector('[name="preventiveAction"]')
+              .value,
+            remarks: item.querySelector('[name="remarks"]').value,
+            categoryCode: getCategoryCode(category),
+          });
+        });
+
+        if (isEditing) {
+          const index = inspections.findIndex((i) => i.id === isEditing);
+          if (index !== -1) {
+            formData.id = isEditing;
+            formData.supabaseId = inspections[index].supabaseId;
+            inspections[index] = formData;
+            delete form.dataset.editingId;
+          }
+        } else {
+          formData.id = generateId();
+          inspections.push(formData);
+        }
+
+        localStorage.setItem(LS_KEY, JSON.stringify(inspections));
+
+        if (supabaseService.isConnected) {
+          await supabaseService.saveInspection(formData);
+        }
+
+        showToast(
+          isEditing
+            ? "Inspection updated successfully"
+            : "New inspection added successfully",
+          "success"
+        );
+
+        resetForm();
+        switchTab("dashboard");
+      }
+
+      function resetForm() {
+        const form = document.getElementById("inspection-form");
+        if (!form) return;
+
+        form.reset();
+        delete form.dataset.editingId;
+
+        const today = new Date().toISOString().split("T")[0];
+        const dateInput = document.getElementById("date");
+        const qtrInput = document.getElementById("qtr");
+        const tcInput = document.getElementById("tc");
+
+        if (dateInput) dateInput.value = today;
+        if (qtrInput) qtrInput.value = calculateQTR(today);
+        if (tcInput) tcInput.value = "";
+
+        const observationsContainer = document.getElementById(
+          "observations-container"
+        );
+        if (observationsContainer) observationsContainer.innerHTML = "";
+
+        const noObsMessage = document.getElementById("no-obs-message");
+        if (noObsMessage) {
+          noObsMessage.style.display = "block";
+          noObsMessage.innerHTML = `
+                  <i class="fas fa-clipboard-check text-4xl text-gray-300 mb-4"></i>
+                  <h4 class="font-medium text-gray-700 mb-2">No observations added</h4>
+                  <p class="text-gray-500 text-sm">Click "Add Observation" to include inspection findings or "Mark as NIL" if there are no observations</p>
+                `;
+        }
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn)
+          submitBtn.innerHTML =
+            '<i class="fas fa-save mr-2"></i> Save Inspection';
+
+        const sectionTitle = document.querySelector(
+          "#add-inspection .section-title"
+        );
+        const sectionSubtitle = document.querySelector(
+          "#add-inspection .section-subtitle"
+        );
+        if (sectionTitle) sectionTitle.textContent = "Add New Inspection";
+        if (sectionSubtitle)
+          sectionSubtitle.textContent =
+            "Complete all required fields to add a new inspection record";
+
+        document
+          .querySelectorAll(".form-error")
+          .forEach((el) => (el.textContent = ""));
+        document
+          .querySelectorAll(".form-control")
+          .forEach((el) => el.classList.remove("is-invalid"));
+      }
+
+      function viewInspection(id) {
+        const insp = inspections.find((i) => i.id === id);
+        if (!insp) return;
+
+        const modalTitle = document.getElementById("modal-title");
+        const modalSubtitle = document.getElementById("modal-subtitle");
+        const modalContent = document.getElementById("modal-content");
+        const modalBackdrop = document.getElementById("modal-backdrop");
+
+        if (!modalTitle || !modalSubtitle || !modalContent || !modalBackdrop)
+          return;
+
+        modalTitle.textContent = `Inspection: ${insp.vesselName}`;
+        modalSubtitle.textContent = `${formatDate(insp.date)} | ${
+          insp.port
+        } | ${insp.oilMajor}`;
+
+        let observationsHTML = "";
+        if (insp.observations.length > 0) {
+          observationsHTML = insp.observations
+            .map(
+              (obs, index) => `
+                      <div class="observation-item ${
+                        obs.categoryCode
+                      } p-4 rounded-lg mb-4" id="obs-${index}">
+                          <div class="flex justify-between items-start mb-3">
+                              <div class="flex items-center">
+                                  <span class="badge ${
+                                    obs.category === "Hardware"
+                                      ? "badge-danger"
+                                      : obs.category === "Process"
+                                      ? "badge-info"
+                                      : obs.category === "Human"
+                                      ? "badge-warning"
+                                      : "badge-success"
+                                  }">
+                                      ${obs.obsNo}
+                                  </span>
+                                  <span class="font-semibold ml-3">${
+                                    obs.category
+                                  }</span>
+                              </div>
+                              <div class="flex items-center gap-2">
+                                  <button onclick="copyObservation(${index}, '${
+                insp.id
+              }')" class="btn btn-outline text-xs px-3 py-2" title="Copy Observation Data">
+                                      <i class="fas fa-copy"></i>
+                                  </button>
+                                  <span class="text-xs font-medium px-2 py-1 rounded bg-gray-100">${
+                                    obs.categoryCode
+                                  }</span>
+                              </div>
+                          </div>
+
+                          <div class="space-y-4">
+                              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div class="bg-gray-50 p-3 rounded">
+                                      <div class="font-medium text-xs text-gray-500 mb-1">Observation Number</div>
+                                      <div class="font-mono text-sm">${
+                                        obs.obsNo || "-"
+                                      }</div>
+                                  </div>
+                                  <div class="bg-gray-50 p-3 rounded">
+                                      <div class="font-medium text-xs text-gray-500 mb-1">Category</div>
+                                      <div>${obs.category || "-"}</div>
+                                  </div>
+                              </div>
+
+                              <div class="bg-gray-50 p-3 rounded">
+                                  <div class="font-medium text-xs text-gray-500 mb-1">Description</div>
+                                  <div class="text-sm text-gray-700">${
+                                    obs.description || "-"
+                                  }</div>
+                              </div>
+
+                              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div class="bg-gray-50 p-3 rounded">
+                                      <div class="font-medium text-xs text-gray-500 mb-1">Immediate Cause</div>
+                                      <div class="text-sm">${
+                                        obs.immediateCause || "-"
+                                      }</div>
+                                  </div>
+                                  <div class="bg-gray-50 p-3 rounded">
+                                      <div class="font-medium text-xs text-gray-500 mb-1">Root Cause</div>
+                                      <div class="text-sm">${
+                                        obs.rootCause || "-"
+                                      }</div>
+                                  </div>
+                              </div>
+
+                              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div class="bg-gray-50 p-3 rounded">
+                                      <div class="font-medium text-xs text-gray-500 mb-1">Corrective Action</div>
+                                      <div class="text-sm">${
+                                        obs.correctiveAction || "-"
+                                      }</div>
+                                  </div>
+                                  <div class="bg-gray-50 p-3 rounded">
+                                      <div class="font-medium text-xs text-gray-500 mb-1">Preventive Action</div>
+                                      <div class="text-sm">${
+                                        obs.preventiveAction || "-"
+                                      }</div>
+                                  </div>
+                              </div>
+
+                              <div class="bg-gray-50 p-3 rounded">
+                                  <div class="font-medium text-xs text-gray-500 mb-1">Remarks</div>
+                                      <div class="text-sm text-gray-700">${
+                                        obs.remarks || "-"
+                                      }</div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  `
+            )
+            .join("");
+        } else {
+          observationsHTML = `
+                  <div class="empty-state">
+                      <i class="fas fa-check-circle text-green-400 text-4xl mb-4"></i>
+                      <h3 class="font-medium text-gray-700 mb-2">No Observations (NIL)</h3>
+                      <p class="text-gray-500">This inspection has no observations</p>
+                  </div>
+              `;
+        }
+
+        modalContent.innerHTML = `
+              <div class="space-y-6">
+                  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div class="bg-gray-50 p-4 rounded-lg">
+                          <div class="text-xs text-gray-500 mb-1">Vessel</div>
+                          <div class="font-semibold">${insp.vesselName}</div>
+                      </div>
+                      <div class="bg-gray-50 p-4 rounded-lg">
+                          <div class="text-xs text-gray-500 mb-1">TC Code</div>
+                          <div class="font-semibold">${insp.tc}</div>
+                      </div>
+                      <div class="bg-gray-50 p-4 rounded-lg">
+                          <div class="text-xs text-gray-500 mb-1">Inspection Date</div>
+                          <div class="font-semibold">${formatDate(
+                            insp.date
+                          )}</div>
+                      </div>
+                      <div class="bg-gray-50 p-4 rounded-lg">
+                          <div class="text-xs text-gray-500 mb-1">Quarter</div>
+                          <div class="font-semibold">${insp.qtr}</div>
+                      </div>
+                      <div class="bg-gray-50 p-4 rounded-lg">
+                          <div class="text-xs text-gray-500 mb-1">Oil Major</div>
+                          <div class="font-semibold">${insp.oilMajor}</div>
+                      </div>
+                      <div class="bg-gray-50 p-4 rounded-lg">
+                          <div class="text-xs text-gray-500 mb-1">Port</div>
+                          <div class="font-semibold">${insp.port}</div>
+                      </div>
+                      <div class="bg-gray-50 p-4 rounded-lg">
+                          <div class="text-xs text-gray-500 mb-1">Inspector</div>
+                          <div class="font-semibold">${insp.inspector}</div>
+                      </div>
+                      <div class="bg-gray-50 p-4 rounded-lg">
+                          <div class="text-xs text-gray-500 mb-1">SIRE Due Date</div>
+                          <div class="font-semibold ${
+                            new Date(insp.sireDueDate) < new Date()
+                              ? "text-red-600"
+                              : "text-green-600"
+                          }">
+                              ${formatDate(insp.sireDueDate)}
+                          </div>
+                      </div>
+                  </div>
+
+                  <div class="border-t pt-6">
+                      <div class="flex justify-between items-center mb-4">
+                          <h4 class="text-lg font-semibold">Observations (${
+                            insp.observations.length
+                          })</h4>
+                          ${
+                            insp.observations.length > 0
+                              ? `
+                              <button onclick="copyAllObservations('${insp.id}')" class="btn btn-outline text-sm" title="Copy All Observations">
+                                  <i class="fas fa-copy mr-2"></i> Copy All
+                              </button>
+                          `
+                              : ""
+                          }
+                      </div>
+                      ${observationsHTML}
+                  </div>
+              </div>
+          `;
+
+        modalBackdrop.classList.remove("hidden");
+      }
+
+      function copyObservation(index, inspectionId) {
+        const insp = inspections.find((i) => i.id === inspectionId);
+        if (!insp || !insp.observations || !insp.observations[index]) return;
+
+        const obs = insp.observations[index];
+        const formattedText = `
+Observation Number: ${obs.obsNo}
+Category: ${obs.category}
+Description: ${obs.description}
+Immediate Cause: ${obs.immediateCause}
+Root Cause: ${obs.rootCause}
+Corrective Action: ${obs.correctiveAction}
+Preventive Action: ${obs.preventiveAction}
+Remarks: ${obs.remarks}`.trim();
+
+        navigator.clipboard
+          .writeText(formattedText)
+          .then(() => {
+            showToast("Observation data copied to clipboard!", "success");
+
+            // Add visual feedback
+            const button = event.currentTarget;
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i>';
+            button.classList.remove("btn-outline");
+            button.classList.add("btn-success");
+
+            setTimeout(() => {
+              button.innerHTML = originalHTML;
+              button.classList.remove("btn-success");
+              button.classList.add("btn-outline");
+            }, 2000);
+          })
+          .catch((err) => {
+            console.error("Failed to copy:", err);
+            showToast("Failed to copy data", "error");
+          });
+      }
+
+      function copyAllObservations(inspectionId) {
+        const insp = inspections.find((i) => i.id === inspectionId);
+        if (!insp || !insp.observations || insp.observations.length === 0)
+          return;
+
+        let allObservationsText = `=== ${insp.vesselName} - ${formatDate(
+          insp.date
+        )} ===\n\n`;
+
+        insp.observations.forEach((obs, index) => {
+          allObservationsText += `[Observation ${index + 1}]\n`;
+          allObservationsText += `Observation Number: ${obs.obsNo || "-"}\n`;
+          allObservationsText += `Category: ${obs.category || "-"}\n`;
+          allObservationsText += `Description: ${obs.description || "-"}\n`;
+          allObservationsText += `Immediate Cause: ${
+            obs.immediateCause || "-"
+          }\n`;
+          allObservationsText += `Root Cause: ${obs.rootCause || "-"}\n`;
+          allObservationsText += `Corrective Action: ${
+            obs.correctiveAction || "-"
+          }\n`;
+          allObservationsText += `Preventive Action: ${
+            obs.preventiveAction || "-"
+          }\n`;
+          allObservationsText += `Remarks: ${obs.remarks || "-"}\n\n`;
+        });
+
+        navigator.clipboard
+          .writeText(allObservationsText.trim())
+          .then(() => {
+            showToast(
+              `All ${insp.observations.length} observations copied!`,
+              "success"
+            );
+
+            // Add visual feedback to the "Copy All" button
+            const button = event.currentTarget;
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check mr-2"></i> Copied!';
+            button.classList.remove("btn-outline");
+            button.classList.add("btn-success");
+
+            setTimeout(() => {
+              button.innerHTML = originalHTML;
+              button.classList.remove("btn-success");
+              button.classList.add("btn-outline");
+            }, 2000);
+          })
+          .catch((err) => {
+            console.error("Failed to copy:", err);
+            showToast("Failed to copy data", "error");
+          });
+      }
+
+      function editInspection(id) {
+        const insp = inspections.find((i) => i.id === id);
+        if (!insp) {
+          showToast("Inspection not found", "error");
+          return;
+        }
+
+        switchTab("add-inspection");
+
+        setTimeout(() => {
+          const form = document.getElementById("inspection-form");
+          if (!form) return;
+
+          form.dataset.editingId = insp.id;
+
+          document.getElementById("vesselName").value = insp.vesselName;
+          document.getElementById("tc").value = insp.tc;
+          document.getElementById("date").value = formatDateForInput(insp.date);
+          document.getElementById("qtr").value = insp.qtr;
+          document.getElementById("oilMajor").value = insp.oilMajor;
+          document.getElementById("port").value = insp.port;
+          document.getElementById("inspector").value = insp.inspector;
+
+          const container = document.getElementById("observations-container");
+          if (container) container.innerHTML = "";
+
+          if (insp.observations && insp.observations.length > 0) {
+            insp.observations.forEach((obs) => addObservation(obs));
+          } else {
+            const noObsMessage = document.getElementById("no-obs-message");
+            if (noObsMessage) {
+              noObsMessage.style.display = "block";
+              noObsMessage.innerHTML = `
+                      <i class="fas fa-check-circle text-4xl text-green-500 mb-4"></i>
+                      <h4 class="font-medium text-gray-700 mb-2">Marked as NIL (No Observations)</h4>
+                      <p class="text-gray-500 text-sm">This inspection has no observations</p>
+                      <button type="button" onclick="addObservation()" class="btn btn-outline mt-4">
+                        <i class="fas fa-plus mr-2"></i> Add Observation Anyway
+                      </button>
+                    `;
+            }
+          }
+
+          const sectionTitle = document.querySelector(
+            "#add-inspection .section-title"
+          );
+          const sectionSubtitle = document.querySelector(
+            "#add-inspection .section-subtitle"
+          );
+          const submitBtn = document.querySelector(
+            '#inspection-form button[type="submit"]'
+          );
+
+          if (sectionTitle) sectionTitle.textContent = "Edit Inspection";
+          if (sectionSubtitle)
+            sectionSubtitle.textContent = `Editing inspection for ${
+              insp.vesselName
+            } on ${formatDate(insp.date)}`;
+          if (submitBtn)
+            submitBtn.innerHTML =
+              '<i class="fas fa-save mr-2"></i> Update Inspection';
+
+          showToast(`Editing inspection for ${insp.vesselName}`, "info");
+        }, 100);
+      }
+
+      function closeModal() {
+        const modalBackdrop = document.getElementById("modal-backdrop");
+        if (modalBackdrop) modalBackdrop.classList.add("hidden");
+      }
+
+      // Planner Functions
+      function getPriorityStatus(sireDueDateStr) {
+        const dueDate = new Date(sireDueDateStr);
+        const today = new Date();
+        const diffTime = dueDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        let priority = "Low";
+        let cssClass = "priority-low";
+        let badgeClass = "badge-success";
+
+        if (diffDays <= 0) {
+          priority = "EXPIRED";
+          cssClass = "priority-expired";
+          badgeClass = "badge-danger";
+        } else if (diffDays <= 15) {
+          priority = "CRITICAL";
+          cssClass = "priority-critical";
+          badgeClass = "badge-danger";
+        } else if (diffDays <= 30) {
+          priority = "High";
+          cssClass = "priority-high";
+          badgeClass = "badge-warning";
+        } else if (diffDays <= 60) {
+          priority = "Medium";
+          cssClass = "priority-medium";
+          badgeClass = "badge-info";
+        }
+
+        const nextInspRangeStart = new Date(dueDate);
+        nextInspRangeStart.setMonth(nextInspRangeStart.getMonth() - 2);
+
+        return {
+          daysLeft: diffDays,
+          priority: priority,
+          cssClass: cssClass,
+          badgeClass: badgeClass,
+          nextInspRangeStart: nextInspRangeStart.toISOString().split("T")[0],
+        };
+      }
+
+      function getLatestInspections() {
+        const latestMap = new Map();
+        inspections.forEach((insp) => {
+          const currentLatest = latestMap.get(insp.vesselName);
+          if (
+            !currentLatest ||
+            new Date(insp.date) > new Date(currentLatest.date)
+          ) {
+            latestMap.set(insp.vesselName, insp);
+          }
+        });
+        return Array.from(latestMap.values());
+      }
+
+      function renderPlanner() {
+        const latestInspections = getLatestInspections();
+        const tbody = document.getElementById("planner-table-body");
+        const alertsDiv = document.getElementById("planner-alerts");
+
+        if (!tbody || !alertsDiv) return;
+
+        tbody.innerHTML = "";
+        alertsDiv.innerHTML = "";
+
+        if (latestInspections.length === 0) {
+          tbody.innerHTML = `
+                  <tr>
+                    <td colspan="8" class="text-center py-12">
+                      <div class="empty-state">
+                        <i class="fas fa-calendar-times text-4xl mb-4"></i>
+                        <h3 class="font-medium text-gray-700 mb-2">No inspections found</h3>
+                        <p class="text-gray-500">Add inspections to see the planner</p>
+                      </div>
+                    </td>
+                  </tr>`;
+          return;
+        }
+
+        const expiredVessels = [];
+        const criticalVessels = [];
+        const highPriorityVessels = [];
+
+        latestInspections
+          .sort((a, b) => new Date(a.sireDueDate) - new Date(b.sireDueDate))
+          .forEach((insp) => {
+            const status = getPriorityStatus(insp.sireDueDate);
+
+            if (status.priority === "EXPIRED") {
+              expiredVessels.push({
+                vessel: insp.vesselName,
+                days: status.daysLeft,
+                dueDate: insp.sireDueDate,
+              });
+            } else if (status.priority === "CRITICAL") {
+              criticalVessels.push({
+                vessel: insp.vesselName,
+                days: status.daysLeft,
+                dueDate: insp.sireDueDate,
+              });
+            } else if (status.priority === "High") {
+              highPriorityVessels.push({
+                vessel: insp.vesselName,
+                days: status.daysLeft,
+                dueDate: insp.sireDueDate,
+              });
+            }
+
+            const daysLeftDisplay =
+              status.daysLeft <= 0
+                ? `<span class="text-red-600 font-bold">Expired (${Math.abs(
+                    status.daysLeft
+                  )}d ago)</span>`
+                : `${status.daysLeft} days`;
+
+            const row = document.createElement("tr");
+            row.classList.add(status.cssClass);
+            row.innerHTML = `
+                    <td class="font-semibold">
+                      <div class="flex items-center">
+                        <i class="fas fa-ship mr-2 text-gray-500"></i>
+                        ${insp.vesselName}
+                      </div>
+                    </td>
+                    <td>${formatDate(insp.date)}</td>
+                    <td>${insp.oilMajor}</td>
+                    <td class="font-medium">${formatDate(insp.sireDueDate)}</td>
+                    <td class="text-center font-semibold">${daysLeftDisplay}</td>
+                    <td>${formatDate(status.nextInspRangeStart)}</td>
+                    <td class="text-center">
+                      <span class="badge ${status.badgeClass}">${
+              status.priority
+            }</span>
+                    </td>
+                    <td class="text-center">
+                      <button onclick="sendEmailAlert('${insp.vesselName}', '${
+              insp.sireDueDate
+            }', ${status.daysLeft})" 
+                        class="btn btn-outline text-xs px-3 py-2 ${
+                          status.priority === "EXPIRED" ||
+                          status.priority === "CRITICAL"
+                            ? "btn-danger"
+                            : "btn-primary"
+                        }">
+                        <i class="fas fa-envelope"></i>
+                      </button>
+                    </td>
+                  `;
+            tbody.appendChild(row);
+          });
+
+        let alertHTML = "";
+
+        if (expiredVessels.length > 0) {
+          alertHTML += `
+                  <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg mb-4">
+                    <div class="flex">
+                      <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+                      </div>
+                      <div class="ml-3">
+                        <h3 class="text-sm font-bold text-red-800 mb-1">EXPIRED INSPECTIONS - Immediate Action Required</h3>
+                        <div class="mt-1 text-sm text-red-700">
+                          <ul class="list-disc pl-5 space-y-1">
+                            ${expiredVessels
+                              .map(
+                                (v) =>
+                                  `<li><strong>${
+                                    v.vessel
+                                  }</strong> - Expired ${Math.abs(
+                                    v.days
+                                  )} days ago (Due: ${formatDate(
+                                    v.dueDate
+                                  )})</li>`
+                              )
+                              .join("")}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+        }
+
+        if (criticalVessels.length > 0) {
+          alertHTML += `
+                  <div class="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg mb-4">
+                    <div class="flex">
+                      <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle text-orange-500 text-xl"></i>
+                      </div>
+                      <div class="ml-3">
+                        <h3 class="text-sm font-bold text-orange-800 mb-1">CRITICAL - Due within 15 days</h3>
+                        <div class="mt-1 text-sm text-orange-700">
+                          <ul class="list-disc pl-5 space-y-1">
+                            ${criticalVessels
+                              .map(
+                                (v) =>
+                                  `<li><strong>${v.vessel}</strong> - ${
+                                    v.days
+                                  } days remaining (Due: ${formatDate(
+                                    v.dueDate
+                                  )})</li>`
+                              )
+                              .join("")}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+        }
+
+        if (highPriorityVessels.length > 0) {
+          alertHTML += `
+                  <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg mb-4">
+                    <div class="flex">
+                      <div class="flex-shrink-0">
+                        <i class="fas fa-clock text-yellow-500 text-xl"></i>
+                      </div>
+                      <div class="ml-3">
+                        <h3 class="text-sm font-bold text-yellow-800 mb-1">HIGH PRIORITY - Due within 30 days</h3>
+                        <div class="mt-1 text-sm text-yellow-700">
+                          <ul class="list-disc pl-5 space-y-1">
+                            ${highPriorityVessels
+                              .map(
+                                (v) =>
+                                  `<li><strong>${v.vessel}</strong> - ${
+                                    v.days
+                                  } days remaining (Due: ${formatDate(
+                                    v.dueDate
+                                  )})</li>`
+                              )
+                              .join("")}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+        }
+
+        if (
+          expiredVessels.length === 0 &&
+          criticalVessels.length === 0 &&
+          highPriorityVessels.length === 0
+        ) {
+          alertHTML = `
+                  <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+                    <div class="flex">
+                      <div class="flex-shrink-0">
+                        <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                      </div>
+                      <div class="ml-3">
+                        <h3 class="text-sm font-bold text-green-800">All Clear</h3>
+                        <div class="mt-1 text-sm text-green-700">
+                          <p>No immediate due date concerns. All inspections are up to date.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+        }
+
+        alertsDiv.innerHTML = alertHTML;
+      }
+
+      // Monthly View Functions
+      function renderMonthlyView() {
+        const tbody = document.getElementById("monthly-view-table-body");
+        if (!tbody) return;
+
+        tbody.innerHTML = "";
+
+        const vesselInspections = {};
+        inspections.forEach((insp) => {
+          if (!vesselInspections[insp.vesselName]) {
+            vesselInspections[insp.vesselName] = [];
+          }
+          vesselInspections[insp.vesselName].push(insp);
+        });
+
+        if (Object.keys(vesselInspections).length === 0) {
+          tbody.innerHTML = `
+                  <tr>
+                    <td colspan="15" class="text-center py-12">
+                      <div class="empty-state">
+                        <i class="fas fa-calendar text-4xl mb-4"></i>
+                        <h3 class="font-medium text-gray-700 mb-2">No vessel data available</h3>
+                        <p class="text-gray-500">Add inspections to see monthly view</p>
+                      </div>
+                    </td>
+                  </tr>`;
+          return;
+        }
+
+        Object.keys(vesselInspections).forEach((vessel) => {
+          const vesselInspects = vesselInspections[vessel];
+          const latestInspection = vesselInspects.reduce((latest, insp) =>
+            new Date(insp.date) > new Date(latest.date) ? insp : latest
+          );
+
+          const monthlyData = Array(12)
+            .fill()
+            .map(() => []);
+
+          vesselInspects.forEach((insp) => {
+            const inspDate = new Date(insp.date);
+            const month = inspDate.getMonth();
+            monthlyData[month].push(insp);
+          });
+
+          const row = document.createElement("tr");
+          row.classList.add("hover:bg-gray-50");
+
+          let rowHTML = `
+                  <td class="sticky left-0 bg-white font-semibold border-r border-gray-200">
+                    <div class="flex items-center">
+                      <i class="fas fa-ship text-gray-400 mr-2"></i>
+                      ${vessel}
+                    </div>
+                  </td>
+                  <td>${formatDate(latestInspection.date)}</td>
+                  <td class="border-r border-gray-200">${
+                    latestInspection.oilMajor
+                  }</td>
+                `;
+
+          for (let month = 0; month < 12; month++) {
+            const monthInspections = monthlyData[month];
+            let cellContent = "";
+
+            if (monthInspections.length > 0) {
+              cellContent = monthInspections
+                .map(
+                  (insp) => `
+                          <div class="mb-2 p-2 border rounded bg-white hover:bg-gray-50 last:mb-0">
+                            <div class="text-xs font-semibold">${formatDate(
+                              insp.date
+                            )}</div>
+                            <div class="text-xs text-gray-600">${
+                              insp.oilMajor
+                            }</div>
+                            <div class="text-xs ${
+                              insp.observations.length > 0
+                                ? "text-red-500 font-bold"
+                                : "text-green-500"
+                            }">
+                              ${insp.observations.length} obs
+                            </div>
+                          </div>
+                        `
+                )
+                .join("");
+            } else {
+              cellContent = '<span class="text-gray-300">-</span>';
+            }
+
+            rowHTML += `<td class="text-center align-top">${cellContent}</td>`;
+          }
+
+          row.innerHTML = rowHTML;
+          tbody.appendChild(row);
+        });
+      }
+
+      // Observation Breakdown Functions
+      function renderObsBreakdown() {
+        const tbody = document.getElementById("obs-breakdown-table-body");
+        if (!tbody) return;
+
+        tbody.innerHTML = "";
+
+        const vesselInspections = {};
+        inspections.forEach((insp) => {
+          if (!vesselInspections[insp.vesselName]) {
+            vesselInspections[insp.vesselName] = [];
+          }
+          vesselInspections[insp.vesselName].push(insp);
+        });
+
+        const vesselNames = Object.keys(vesselInspections).sort();
+
+        if (vesselNames.length === 0) {
+          tbody.innerHTML = `
+                  <tr>
+                    <td colspan="15" class="text-center py-12">
+                      <div class="empty-state">
+                        <i class="fas fa-chart-pie text-4xl mb-4"></i>
+                        <h3 class="font-medium text-gray-700 mb-2">No data available</h3>
+                        <p class="text-gray-500">No inspections match the selected filters</p>
+                      </div>
+                    </td>
+                  </tr>`;
+          return;
+        }
+
+        vesselNames.forEach((vessel) => {
+          const vesselInspects = vesselInspections[vessel];
+          vesselInspects.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+          vesselInspects.forEach((insp, inspIndex) => {
+            const row = document.createElement("tr");
+            if (inspIndex > 0) row.classList.add("border-t-0");
+            row.classList.add("hover:bg-gray-50");
+
+            const viqColumns = Array(11)
+              .fill()
+              .map(() => []);
+
+            insp.observations.forEach((obs) => {
+              const obsNo = obs.obsNo;
+              const chapter = parseInt(obsNo.split(".")[0]);
+              if (chapter >= 2 && chapter <= 12) {
+                const chapterIndex = chapter - 2;
+                viqColumns[chapterIndex].push({
+                  obsNo: obsNo,
+                  categoryCode:
+                    obs.categoryCode || getCategoryCode(obs.category),
+                });
+              }
+            });
+
+            let rowHTML = "";
+
+            if (inspIndex === 0) {
+              rowHTML += `<td rowspan="${vesselInspects.length}" class="font-semibold align-top border-r border-gray-200">
+                      <div class="flex items-center">
+                        <i class="fas fa-ship text-gray-400 mr-2"></i>
+                        ${vessel}
+                      </div>
+                    </td>`;
+            }
+
+            rowHTML += `
+                    <td class="align-top">
+                      <div class="font-medium">${formatDate(insp.date)} ${
+              insp.oilMajor
+            }</div>
+                    </td>
+                    <td class="text-center align-top font-bold ${
+                      insp.observations.length > 0
+                        ? "text-red-600"
+                        : "text-green-600"
+                    }">
+                      ${insp.observations.length}
+                    </td>
+                  `;
+
+            for (let i = 0; i < 11; i++) {
+              const observations = viqColumns[i];
+              let cellContent = "";
+
+              if (observations.length > 0) {
+                cellContent = observations
+                  .map((obs) => {
+                    const badgeClass =
+                      obs.categoryCode === "H"
+                        ? "badge-danger"
+                        : obs.categoryCode === "P"
+                        ? "badge-info"
+                        : obs.categoryCode === "HM"
+                        ? "badge-warning"
+                        : "badge-success";
+                    return `<div class="mb-1"><span class="badge ${badgeClass} text-xs">${obs.obsNo} ${obs.categoryCode}</span></div>`;
+                  })
+                  .join("");
+              }
+
+              rowHTML += `<td class="align-top">${cellContent}</td>`;
+            }
+
+            row.innerHTML = rowHTML;
+            tbody.appendChild(row);
+          });
+        });
+      }
+
+      // Analysis Functions
+      function runAnalysis() {
+        const vesselStats = {};
+        const oilMajorStats = {};
+
+        inspections.forEach((insp) => {
+          if (!vesselStats[insp.vesselName]) {
+            vesselStats[insp.vesselName] = {
+              noOfInsp: 0,
+              noOfObs: 0,
+              categoryCounts: {
+                Hardware: 0,
+                Process: 0,
+                Human: 0,
+                Photographs: 0,
+              },
+            };
+          }
+          vesselStats[insp.vesselName].noOfInsp++;
+          vesselStats[insp.vesselName].noOfObs += insp.observations.length;
+          insp.observations.forEach((obs) => {
+            if (
+              vesselStats[insp.vesselName].categoryCounts[obs.category] !==
+              undefined
+            ) {
+              vesselStats[insp.vesselName].categoryCounts[obs.category]++;
+            }
+          });
+
+          if (!oilMajorStats[insp.oilMajor]) {
+            oilMajorStats[insp.oilMajor] = {
+              noOfInspection: 0,
+              noOfObs: 0,
+              categoryCounts: {
+                Hardware: 0,
+                Process: 0,
+                Human: 0,
+                Photographs: 0,
+              },
+            };
+          }
+          oilMajorStats[insp.oilMajor].noOfInspection++;
+          oilMajorStats[insp.oilMajor].noOfObs += insp.observations.length;
+          insp.observations.forEach((obs) => {
+            if (
+              oilMajorStats[insp.oilMajor].categoryCounts[obs.category] !==
+              undefined
+            ) {
+              oilMajorStats[insp.oilMajor].categoryCounts[obs.category]++;
+            }
+          });
+        });
+
+        Object.keys(vesselStats).forEach((vessel) => {
+          const stats = vesselStats[vessel];
+          stats.avgObs =
+            stats.noOfInsp > 0
+              ? (stats.noOfObs / stats.noOfInsp).toFixed(1)
+              : "0.0";
+        });
+
+        Object.keys(oilMajorStats).forEach((om) => {
+          const stats = oilMajorStats[om];
+          stats.avgObs =
+            stats.noOfInspection > 0
+              ? (stats.noOfObs / stats.noOfInspection).toFixed(1)
+              : "0.0";
+        });
+
+        return { vesselStats, oilMajorStats };
+      }
+
+      function renderAnalysis() {
+        const analysis = runAnalysis();
+
+        const vesselBody = document.getElementById(
+          "vessel-analysis-table-body"
+        );
+        const omBody = document.getElementById("om-analysis-table-body");
+
+        if (vesselBody) {
+          vesselBody.innerHTML = "";
+
+          Object.keys(analysis.vesselStats)
+            .sort()
+            .forEach((vessel) => {
+              const stats = analysis.vesselStats[vessel];
+              const row = document.createElement("tr");
+              row.classList.add("hover:bg-gray-50");
+              row.innerHTML = `
+                    <td class="font-semibold">${vessel}</td>
+                    <td class="text-center">${stats.noOfInsp}</td>
+                    <td class="text-center font-bold">${stats.noOfObs}</td>
+                    <td class="text-center">
+                      ${
+                        stats.categoryCounts.Hardware > 0
+                          ? `<span class="badge badge-danger">${stats.categoryCounts.Hardware}</span>`
+                          : "0"
+                      }
+                    </td>
+                    <td class="text-center">
+                      ${
+                        stats.categoryCounts.Process > 0
+                          ? `<span class="badge badge-info">${stats.categoryCounts.Process}</span>`
+                          : "0"
+                      }
+                    </td>
+                    <td class="text-center">
+                      ${
+                        stats.categoryCounts.Human > 0
+                          ? `<span class="badge badge-warning">${stats.categoryCounts.Human}</span>`
+                          : "0"
+                      }
+                    </td>
+                    <td class="text-center">
+                      ${
+                        stats.categoryCounts.Photographs > 0
+                          ? `<span class="badge badge-success">${stats.categoryCounts.Photographs}</span>`
+                          : "0"
+                      }
+                    </td>
+                    <td class="text-center font-bold text-primary-600">${
+                      stats.avgObs
+                    }</td>
+                  `;
+              vesselBody.appendChild(row);
+            });
+        }
+
+        if (omBody) {
+          omBody.innerHTML = "";
+
+          Object.keys(analysis.oilMajorStats)
+            .sort()
+            .forEach((om) => {
+              const stats = analysis.oilMajorStats[om];
+              const row = document.createElement("tr");
+              row.classList.add("hover:bg-gray-50");
+              row.innerHTML = `
+                    <td class="font-semibold">${om}</td>
+                    <td class="text-center">${stats.noOfInspection}</td>
+                    <td class="text-center font-bold">${stats.noOfObs}</td>
+                    <td class="text-center">
+                      ${
+                        stats.categoryCounts.Hardware > 0
+                          ? `<span class="badge badge-danger">${stats.categoryCounts.Hardware}</span>`
+                          : "0"
+                      }
+                    </td>
+                    <td class="text-center">
+                      ${
+                        stats.categoryCounts.Process > 0
+                          ? `<span class="badge badge-info">${stats.categoryCounts.Process}</span>`
+                          : "0"
+                      }
+                    </td>
+                    <td class="text-center">
+                      ${
+                        stats.categoryCounts.Human > 0
+                          ? `<span class="badge badge-warning">${stats.categoryCounts.Human}</span>`
+                          : "0"
+                      }
+                    </td>
+                    <td class="text-center">
+                      ${
+                        stats.categoryCounts.Photographs > 0
+                          ? `<span class="badge badge-success">${stats.categoryCounts.Photographs}</span>`
+                          : "0"
+                      }
+                    </td>
+                    <td class="text-center font-bold text-primary-600">${
+                      stats.avgObs
+                    }</td>
+                  `;
+              omBody.appendChild(row);
+            });
+        }
+
+        renderCharts(analysis);
+      }
+
+      function renderCharts(analysis) {
+        const ctx = document
+          .getElementById("obsCategoryChart")
+          .getContext("2d");
+
+        if (!ctx) return;
+
+        if (obsChart) obsChart.destroy();
+
+        const categories = OBS_CATEGORIES;
+        const vesselNames = Object.keys(analysis.vesselStats);
+
+        const datasets = vesselNames.map((vessel, index) => {
+          const colors = [
+            "rgba(239, 68, 68, 0.8)",
+            "rgba(59, 130, 246, 0.8)",
+            "rgba(245, 158, 11, 0.8)",
+            "rgba(16, 185, 129, 0.8)",
+          ];
+
+          return {
+            label: vessel,
+            data: categories.map(
+              (cat) => analysis.vesselStats[vessel].categoryCounts[cat] || 0
+            ),
+            backgroundColor: colors[index % colors.length],
+            borderColor: colors[index % colors.length].replace("0.8", "1"),
+            borderWidth: 2,
+            borderRadius: 6,
+            barPercentage: 0.8,
+            categoryPercentage: 0.9,
+          };
+        });
+
+        obsChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: categories,
+            datasets: datasets,
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "top",
+                labels: {
+                  font: { family: "'Space Grotesk', sans-serif", size: 12 },
+                  padding: 20,
+                  usePointStyle: true,
+                },
+              },
+              tooltip: {
+                mode: "index",
+                intersect: false,
+                backgroundColor: "rgba(31, 41, 55, 0.9)",
+                titleFont: { family: "'Space Grotesk', sans-serif" },
+                bodyFont: { family: "'Plus Jakarta Sans', sans-serif" },
+                padding: 12,
+                cornerRadius: 8,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: "Number of Observations",
+                  font: {
+                    family: "'Space Grotesk', sans-serif",
+                    size: 12,
+                    weight: "bold",
+                  },
+                },
+                ticks: { stepSize: 1 },
+                grid: { color: "rgba(0, 0, 0, 0.05)" },
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: "Observation Categories",
+                  font: {
+                    family: "'Space Grotesk', sans-serif",
+                    size: 12,
+                    weight: "bold",
+                  },
+                },
+                grid: { display: false },
+              },
+            },
+          },
+        });
+      }
+
+      // Data Management Functions
+      function exportData() {
+        const dataToExport = {
+          inspections: inspections,
+          vesselTCs: vesselTCs,
+          exportDate: new Date().toISOString(),
+          version: "2.0",
+        };
+
+        const dataStr = JSON.stringify(dataToExport, null, 2);
+        const dataUri =
+          "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+        const exportFileDefaultName = `vetting_inspections_${
+          new Date().toISOString().split("T")[0]
+        }.json`;
+
+        const linkElement = document.createElement("a");
+        linkElement.setAttribute("href", dataUri);
+        linkElement.setAttribute("download", exportFileDefaultName);
+        linkElement.click();
+
+        showToast("Data exported successfully", "success");
+      }
+
+      function importData() {
+        const fileInput = document.getElementById("import-file");
+        const statusEl = document.getElementById("import-status");
+
+        if (!fileInput || !statusEl) return;
+
+        if (!fileInput.files.length) {
+          statusEl.textContent = "Please select a file first.";
+          statusEl.className = "text-red-600";
+          return;
+        }
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+          try {
+            const importedData = JSON.parse(e.target.result);
+
+            if (
+              importedData.inspections &&
+              Array.isArray(importedData.inspections)
+            ) {
+              inspections = importedData.inspections;
+              if (importedData.vesselTCs) {
+                vesselTCs = importedData.vesselTCs;
+                localStorage.setItem(LS_TC_KEY, JSON.stringify(vesselTCs));
+              }
+              localStorage.setItem(LS_KEY, JSON.stringify(inspections));
+
+              statusEl.textContent = `Successfully imported ${inspections.length} inspections.`;
+              statusEl.className = "text-green-600";
+              showToast(
+                `Imported ${inspections.length} inspections`,
+                "success"
+              );
+
+              fileInput.value = "";
+              document.getElementById("import-data-btn").disabled = true;
+
+              setupVesselSelect();
+              switchTab("dashboard");
+            } else {
+              throw new Error("Invalid file format");
+            }
+          } catch (error) {
+            statusEl.textContent = `Error importing data: ${error.message}`;
+            statusEl.className = "text-red-600";
+            showToast("Failed to import data", "error");
+          }
+        };
+
+        reader.readAsText(file);
+      }
+
+      function clearAllData() {
+        if (
+          confirm(
+            "Are you sure you want to clear all data? This action cannot be undone."
+          )
+        ) {
+          inspections = [];
+          vesselTCs = INITIAL_TCS;
+          localStorage.setItem(LS_KEY, JSON.stringify([]));
+          localStorage.setItem(LS_TC_KEY, JSON.stringify(INITIAL_TCS));
+
+          setupVesselSelect();
+          showToast("All data cleared", "success");
+          switchTab("dashboard");
+        }
+      }
+
+      function resetToSampleData() {
+        if (
+          confirm(
+            "Reset to sample data? This will replace all current inspections."
+          )
+        ) {
+          inspections = INITIAL_INSPECTIONS;
+          vesselTCs = INITIAL_TCS;
+          localStorage.setItem(LS_KEY, JSON.stringify(inspections));
+          localStorage.setItem(LS_TC_KEY, JSON.stringify(INITIAL_TCS));
+
+          setupVesselSelect();
+          showToast("Reset to sample data", "success");
+          switchTab("dashboard");
+        }
+      }
+
+      // Email Alert Functions
+      function sendEmailAlert(vesselName, sireDueDate, daysLeft) {
+        const modalTitle = document.getElementById("modal-title");
+        const modalSubtitle = document.getElementById("modal-subtitle");
+        const modalContent = document.getElementById("modal-content");
+        const modalBackdrop = document.getElementById("modal-backdrop");
+
+        if (!modalTitle || !modalSubtitle || !modalContent || !modalBackdrop)
+          return;
+
+        modalTitle.textContent = `Send Alert Email - ${vesselName}`;
+        modalSubtitle.textContent = `SIRE Due: ${formatDate(sireDueDate)}`;
+
+        let emailPreview = `URGENT: SIRE Inspection Due Date Alert - ${vesselName}
+
+Dear Team,
+
+This is an automated alert regarding the upcoming SIRE inspection due date for ${vesselName}.
+
+Vessel Details:
+- Vessel Name: ${vesselName}
+- SIRE Due Date: ${formatDate(sireDueDate)}
+- Days Remaining: ${daysLeft > 0 ? daysLeft : "EXPIRED"}
+
+Status: ${getPriorityStatus(sireDueDate).priority}
+
+Required Actions:
+1. Schedule inspection with approved SIRE inspector
+2. Complete vessel preparation checklist
+3. Coordinate with port authorities
+4. Ensure all documentation is up-to-date
+
+Please take immediate action to avoid compliance issues.
+
+Best regards,
+Vetting Hub Alert System`;
+
+        modalContent.innerHTML = `
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="form-label">Email Subject</label>
+                        <input type="text" id="email-subject" class="form-control" value="URGENT: SIRE Inspection Due Date Alert - ${vesselName}">
+                    </div>
+                    <div>
+                        <label class="form-label">Sender Name</label>
+                        <input type="text" id="sender-name" class="form-control" value="Vetting Hub Alert System">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label">Recipients</label>
+                    <div id="recipients-container" class="mb-3 p-3 border rounded">
+                        ${alertEmailRecipients
+                          .map(
+                            (email) => `
+                            <span class="email-recipient-chip">
+                                ${email}
+                                <button type="button" onclick="removeRecipient('${email}')">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </span>
+                        `
+                          )
+                          .join("")}
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="email" id="new-recipient" class="form-control flex-1" placeholder="Add new email address">
+                        <button type="button" onclick="addRecipient()" class="btn btn-outline">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label">Email Body</label>
+                    <textarea id="email-body" rows="12" class="form-control">${emailPreview}</textarea>
+                </div>
+
+                <div>
+                    <label class="form-label">Preview</label>
+                    <div class="email-preview">
+${emailPreview}
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeModal()" class="btn btn-outline">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="sendEmailNow()" class="btn btn-primary">
+                        <i class="fas fa-paper-plane mr-2"></i> Send Email
+                    </button>
+                </div>
+            </div>
+        `;
+
+        modalBackdrop.classList.remove("hidden");
+      }
+
+      function addRecipient() {
+        const input = document.getElementById("new-recipient");
+        if (!input || !input.value.trim()) return;
+
+        const email = input.value.trim();
+        if (!validateEmail(email)) {
+          showToast("Please enter a valid email address", "error");
+          return;
+        }
+
+        if (!alertEmailRecipients.includes(email)) {
+          alertEmailRecipients.push(email);
+          localStorage.setItem(
+            LS_EMAILS_KEY,
+            JSON.stringify(alertEmailRecipients)
+          );
+          renderEmailRecipientsInModal();
+          input.value = "";
+          showToast("Recipient added", "success");
+        } else {
+          showToast("Recipient already exists", "warning");
+        }
+      }
+
+      function removeRecipient(email) {
+        alertEmailRecipients = alertEmailRecipients.filter((e) => e !== email);
+        localStorage.setItem(
+          LS_EMAILS_KEY,
+          JSON.stringify(alertEmailRecipients)
+        );
+        renderEmailRecipientsInModal();
+        showToast("Recipient removed", "success");
+      }
+
+      function renderEmailRecipientsInModal() {
+        const container = document.getElementById("recipients-container");
+        if (!container) return;
+
+        container.innerHTML = alertEmailRecipients
+          .map(
+            (email) => `
+                <span class="email-recipient-chip">
+                    ${email}
+                    <button type="button" onclick="removeRecipient('${email}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </span>
+            `
+          )
+          .join("");
+      }
+
+      function renderEmailRecipients() {
+        const container = document.getElementById("email-recipients-list");
+        if (!container) return;
+
+        container.innerHTML = alertEmailRecipients
+          .map(
+            (email) => `
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span class="font-medium">${email}</span>
+                    <button onclick="removeRecipient('${email}')" class="text-red-500 hover:text-red-700">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+      }
+
+      function sendEmailNow() {
+        const subject = document.getElementById("email-subject").value;
+        const body = document.getElementById("email-body").value;
+        const recipients = alertEmailRecipients.join(",");
+
+        const mailtoLink = `mailto:${recipients}?subject=${encodeURIComponent(
+          subject
+        )}&body=${encodeURIComponent(body)}`;
+
+        window.location.href = mailtoLink;
+        closeModal();
+        showToast("Email client opened. Please send the email.", "success");
+      }
+
+      // Password Management
+      function showPasswordPrompt() {
+        switchTab("data-mgmt");
+        showToast("Please enter password to access Data Management", "info");
+      }
+
+      function unlockDataManagement() {
+        const passwordInput = document.getElementById("password-input");
+        const passwordError = document.getElementById("password-error");
+        const password = passwordInput.value.trim();
+
+        if (password === DATA_MGMT_PASSWORD) {
+          dataMgmtUnlocked = true;
+          document.getElementById("password-overlay").classList.add("hidden");
+          document
+            .getElementById("data-management-content")
+            .classList.remove("hidden");
+          const dataMgmtTab = document.getElementById("data-mgmt-tab");
+          if (dataMgmtTab) dataMgmtTab.style.display = "flex";
+          passwordError.textContent = "";
+          passwordInput.value = "";
+          showToast("Data Management unlocked successfully", "success");
+        } else {
+          passwordError.textContent = "Incorrect password. Please try again.";
+          passwordInput.classList.add("is-invalid");
+          setTimeout(() => passwordInput.classList.remove("is-invalid"), 2000);
+        }
+      }
+
+      // Vessel Management
+      function bulkAddVessels() {
+        const newVessels = {
+          "High Trader": "Spot",
+          "High Trust": "Valaro",
+          "High Challenge": "Spot",
+          "High Discovery": "Aramco",
+          "High Tide": "Reliance",
+          "High Seas": "Antiles",
+          "Cielo Di Gaeta": "Total",
+          "High Wind": "Valaro",
+          "High Fidelity": "BP",
+          "High Voyager": "Spot",
+          "Cielo Di Salerno": "NAYALA",
+          "High Freedom ": "Total",
+          "High Loyalty": "P66",
+          "High Adventurer": "Total",
+          "Cielo Di Rotterdam": "Spot",
+          "Cielo Di New York": "Spot",
+          "Cielo Di Ulsan": "Spot",
+          "Cielo Di Hanoi": "Spot",
+          "High Navigator": "Spot",
+          "High Leader": "Spot",
+        };
+
+        let addedCount = 0;
+        Object.keys(newVessels).forEach((vessel) => {
+          if (!vesselTCs[vessel]) {
+            // Generate TC code if not exists
+            const tcCode = `TC-${vessel.substring(0, 3).toUpperCase()}${
+              Object.keys(vesselTCs).length + 1
+            }`;
+            vesselTCs[vessel] = tcCode;
+            addedCount++;
+
+            // Save to Supabase if connected
+            if (supabaseService.isConnected) {
+              supabaseService.saveVesselTC(vessel, tcCode);
+            }
+          }
+        });
+
+        // Update localStorage
+        localStorage.setItem(LS_TC_KEY, JSON.stringify(vesselTCs));
+
+        // Refresh vessel select
+        setupVesselSelect();
+        // Update the vessel list in the menu
+        updateVesselListInMenu();
+
+        showToast(`${addedCount} vessels added successfully!`, "success");
+      }
+
+      function updateVesselListInMenu() {
+        const container = document.getElementById("vessel-list-container");
+        const countElement = document.getElementById("vessel-count");
+
+        if (!container || !countElement) return;
+
+        const vessels = Object.keys(vesselTCs).sort();
+        container.innerHTML = vessels
+          .map(
+            (vessel) => `
+                <div class="flex justify-between items-center p-2 bg-gray-700 rounded border border-gray-600 mb-2">
+                    <span class="font-medium text-white truncate">${vessel}</span>
+                    <span class="text-sm text-gray-300">${vesselTCs[vessel]}</span>
+                </div>
+            `
+          )
+          .join("");
+
+        countElement.textContent = `Total: ${vessels.length} vessels`;
+      }
+
+      // Initialize Application
+      document.addEventListener("DOMContentLoaded", async () => {
+        await initData();
+        setupVesselSelect();
+        updateVesselListInMenu();
+
+        const today = new Date().toISOString().split("T")[0];
+        const dateInput = document.getElementById("date");
+        const qtrInput = document.getElementById("qtr");
+
+        if (dateInput) dateInput.value = today;
+        if (qtrInput) qtrInput.value = calculateQTR(today);
+
+        renderDashboard();
+
+        // Tab navigation
+        document.querySelectorAll(".tab-btn").forEach((button) => {
+          if (button.dataset.tab !== "data-mgmt") {
+            button.addEventListener("click", (e) =>
+              switchTab(e.target.dataset.tab)
+            );
+          }
+        });
+
+        // Menu toggle
+        const menuToggle = document.getElementById("menuToggle");
+        if (menuToggle) {
+          menuToggle.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const menuSlider = document.getElementById("menuSlider");
+            if (menuSlider) menuSlider.classList.toggle("active");
+          });
+        }
+
+        document.addEventListener("click", (e) => {
+          const menuSlider = document.getElementById("menuSlider");
+          const menuToggle = document.getElementById("menuToggle");
+
+          if (
+            window.innerWidth <= 1024 &&
+            menuSlider &&
+            !menuSlider.contains(e.target) &&
+            menuToggle &&
+            !menuToggle.contains(e.target) &&
+            menuSlider.classList.contains("active")
+          ) {
+            menuSlider.classList.remove("active");
+          }
+        });
+
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && window.innerWidth <= 1024) {
+            const menuSlider = document.getElementById("menuSlider");
+            if (menuSlider) menuSlider.classList.remove("active");
+          }
+        });
+
+        // Form submission
+        const inspectionForm = document.getElementById("inspection-form");
+        if (inspectionForm) {
+          inspectionForm.addEventListener("submit", handleFormSubmission);
+        }
+
+        // Add Observation Button
+        const addObsBtn = document.getElementById("add-obs-btn");
+        if (addObsBtn) {
+          addObsBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            addObservation();
+          });
+        }
+
+        // Mark as NIL Button
+        const markNilBtn = document.getElementById("mark-nil-btn");
+        if (markNilBtn) {
+          markNilBtn.addEventListener("click", markAsNil);
+        }
+
+        // Remove Observation Delegation
+        const observationsContainer = document.getElementById(
+          "observations-container"
+        );
+        if (observationsContainer) {
+          observationsContainer.addEventListener("click", function (e) {
+            if (
+              e.target.classList.contains("remove-obs-btn") ||
+              e.target.closest(".remove-obs-btn")
+            ) {
+              removeObservation(e.target.closest(".remove-obs-btn"));
+            }
+          });
+        }
+
+        // Dashboard Filter
+        const applyFilterBtn = document.getElementById("apply-filter");
+        if (applyFilterBtn) {
+          applyFilterBtn.addEventListener("click", filterDashboard);
+        }
+
+        const clearFilterBtn = document.getElementById("clear-filter");
+        if (clearFilterBtn) {
+          clearFilterBtn.addEventListener("click", () => {
+            const filterText = document.getElementById("filter-text");
+            if (filterText) filterText.value = "";
+            renderDashboard();
+          });
+        }
+
+        const filterText = document.getElementById("filter-text");
+        if (filterText) {
+          filterText.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") filterDashboard();
+          });
+        }
+
+        // Sort functionality
+        const sortSelect = document.getElementById("sort-select");
+        if (sortSelect) {
+          sortSelect.addEventListener("change", () => {
+            renderDashboard();
+          });
+        }
+
+        // Refresh Dashboard
+        const refreshDashboardBtn = document.getElementById(
+          "refresh-dashboard-btn"
+        );
+        if (refreshDashboardBtn) {
+          refreshDashboardBtn.addEventListener("click", () => {
+            renderDashboard();
+            showToast("Dashboard refreshed", "success");
+          });
+        }
+
+        // Sync Cloud Button
+        const syncCloudBtn = document.getElementById("sync-cloud-btn");
+        if (syncCloudBtn) {
+          syncCloudBtn.addEventListener("click", async () => {
+            const btn = syncCloudBtn;
+            const originalHtml = btn.innerHTML;
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+            btn.disabled = true;
+
+            try {
+              await syncLocalToSupabase();
+              showToast("Sync completed successfully", "success");
+            } catch (error) {
+              showToast("Sync failed: " + error.message, "error");
+            } finally {
+              btn.innerHTML = originalHtml;
+              btn.disabled = false;
+              updateSyncStatus();
+            }
+          });
+        }
+
+        // Modal Close
+        const closeModalBtn = document.getElementById("close-modal-btn");
+        if (closeModalBtn) {
+          closeModalBtn.addEventListener("click", closeModal);
+        }
+
+        const modalBackdrop = document.getElementById("modal-backdrop");
+        if (modalBackdrop) {
+          modalBackdrop.addEventListener("click", (e) => {
+            if (e.target.id === "modal-backdrop") closeModal();
+          });
+        }
+
+        // Data Export
+        const exportDataBtn = document.getElementById("export-data-btn");
+        if (exportDataBtn) {
+          exportDataBtn.addEventListener("click", exportData);
+        }
+
+        const exportDashboardBtn = document.getElementById(
+          "export-dashboard-btn"
+        );
+        if (exportDashboardBtn) {
+          exportDashboardBtn.addEventListener("click", exportData);
+        }
+
+        const exportPlannerBtn = document.getElementById("export-planner-btn");
+        if (exportPlannerBtn) {
+          exportPlannerBtn.addEventListener("click", exportData);
+        }
+
+        const exportBreakdownBtn = document.getElementById(
+          "export-breakdown-btn"
+        );
+        if (exportBreakdownBtn) {
+          exportBreakdownBtn.addEventListener("click", exportData);
+        }
+
+        const backupNowBtn = document.getElementById("backup-now-btn");
+        if (backupNowBtn) {
+          backupNowBtn.addEventListener("click", exportData);
+        }
+
+        // Data Import
+        const importFileInput = document.getElementById("import-file");
+        if (importFileInput) {
+          importFileInput.addEventListener("change", (e) => {
+            const importBtn = document.getElementById("import-data-btn");
+            if (importBtn) importBtn.disabled = !e.target.files.length;
+          });
+        }
+
+        const importDataBtn = document.getElementById("import-data-btn");
+        if (importDataBtn) {
+          importDataBtn.addEventListener("click", importData);
+        }
+
+        // Data Management Tools
+        const clearAllDataBtn = document.getElementById("clear-all-data-btn");
+        if (clearAllDataBtn) {
+          clearAllDataBtn.addEventListener("click", clearAllData);
+        }
+
+        const resetSampleBtn = document.getElementById("reset-sample-btn");
+        if (resetSampleBtn) {
+          resetSampleBtn.addEventListener("click", resetToSampleData);
+        }
+
+        // Supabase data management functions
+        const syncToSupabaseBtn = document.getElementById(
+          "sync-to-supabase-btn"
+        );
+        if (syncToSupabaseBtn) {
+          syncToSupabaseBtn.addEventListener("click", async () => {
+            const statusEl = document.getElementById("supabase-status");
+            statusEl.innerHTML =
+              '<div class="text-blue-600"><i class="fas fa-spinner fa-spin"></i> Syncing to Supabase...</div>';
+
+            const count = await syncLocalToSupabase();
+            statusEl.innerHTML = `<div class="text-green-600"><i class="fas fa-check"></i> Synced ${count} inspections to Supabase</div>`;
+            updateSyncStatus();
+          });
+        }
+
+        const pullFromSupabaseBtn = document.getElementById(
+          "pull-from-supabase-btn"
+        );
+        if (pullFromSupabaseBtn) {
+          pullFromSupabaseBtn.addEventListener("click", async () => {
+            const statusEl = document.getElementById("supabase-status");
+            statusEl.innerHTML =
+              '<div class="text-blue-600"><i class="fas fa-spinner fa-spin"></i> Pulling from Supabase...</div>';
+
+            const success = await syncSupabaseToLocal();
+            if (success) {
+              statusEl.innerHTML = `<div class="text-green-600"><i class="fas fa-check"></i> Pulled ${inspections.length} inspections from Supabase</div>`;
+              renderDashboard();
+            } else {
+              statusEl.innerHTML =
+                '<div class="text-red-600"><i class="fas fa-times"></i> Failed to pull from Supabase</div>';
+            }
+            updateSyncStatus();
+          });
+        }
+
+        const clearSupabaseBtn = document.getElementById("clear-supabase-btn");
+        if (clearSupabaseBtn) {
+          clearSupabaseBtn.addEventListener("click", async () => {
+            if (
+              confirm(
+                "WARNING: This will delete ALL data from Supabase. Are you sure?"
+              )
+            ) {
+              const statusEl = document.getElementById("supabase-status");
+              statusEl.innerHTML =
+                '<div class="text-red-600"><i class="fas fa-spinner fa-spin"></i> Clearing Supabase...</div>';
+
+              try {
+                const { error: inspError } = await supabase
+                  .from("inspections")
+                  .delete()
+                  .neq("id", "00000000-0000-0000-0000-000000000000");
+
+                const { error: tcError } = await supabase
+                  .from("vessel_codes")
+                  .delete()
+                  .neq("id", "00000000-0000-0000-0000-000000000000");
+
+                if (inspError || tcError)
+                  throw new Error("Failed to clear data");
+
+                statusEl.innerHTML =
+                  '<div class="text-green-600"><i class="fas fa-check"></i> Supabase data cleared</div>';
+                updateSyncStatus();
+              } catch (error) {
+                statusEl.innerHTML = `<div class="text-red-600"><i class="fas fa-times"></i> Error: ${error.message}</div>`;
+              }
+            }
+          });
+        }
+
+        // Refresh Monthly View
+        const refreshMonthlyBtn = document.getElementById(
+          "refresh-monthly-btn"
+        );
+        if (refreshMonthlyBtn) {
+          refreshMonthlyBtn.addEventListener("click", () => {
+            renderMonthlyView();
+            showToast("Monthly view refreshed", "success");
+          });
+        }
+
+        // Refresh Planner
+        const refreshPlannerBtn = document.getElementById(
+          "refresh-planner-btn"
+        );
+        if (refreshPlannerBtn) {
+          refreshPlannerBtn.addEventListener("click", () => {
+            renderPlanner();
+            showToast("Planner refreshed", "success");
+          });
+        }
+
+        // Charts resize
+        const analysisTab = document.querySelector(
+          '.tab-btn[data-tab="analysis"]'
+        );
+        if (analysisTab) {
+          analysisTab.addEventListener("click", () => {
+            setTimeout(() => {
+              if (obsChart) obsChart.resize();
+            }, 100);
+          });
+        }
+
+        window.addEventListener("resize", () => {
+          if (obsChart) obsChart.resize();
+        });
+
+        // Password input enter key support
+        const passwordInput = document.getElementById("password-input");
+        if (passwordInput) {
+          passwordInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") unlockDataManagement();
+          });
+        }
+
+        // Update sync status periodically
+        setInterval(updateSyncStatus, 30000);
+      });
+    </script>
+  </head>
+  <body>
+    <!-- Menu Toggle Button -->
+    <button class="menu-toggle" id="menuToggle">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Vertical Menu -->
+    <div class="menu-slider" id="menuSlider">
+      <div class="menu-logo">
+        <h2><i class="fas fa-ship"></i> Vetting Hub</h2>
+        <p>Professional Inspection Management</p>
+      </div>
+
+      <div class="menu-content">
+        <button class="tab-btn active" data-tab="dashboard">
+          <i class="fas fa-tachometer-alt"></i> Dashboard
+        </button>
+        <button class="tab-btn" data-tab="add-inspection">
+          <i class="fas fa-plus-circle"></i> Add Inspection
+        </button>
+        <button class="tab-btn" data-tab="planner">
+          <i class="fas fa-calendar-alt"></i> SIRE Planner
+        </button>
+        <button class="tab-btn" data-tab="monthly-view">
+          <i class="fas fa-chart-line"></i> Monthly View
+        </button>
+        <button class="tab-btn" data-tab="obs-breakdown">
+          <i class="fas fa-search"></i> Obs Breakdown
+        </button>
+        <button class="tab-btn" data-tab="analysis">
+          <i class="fas fa-chart-pie"></i> Analysis
+        </button>
+        <button
+          class="tab-btn"
+          data-tab="data-mgmt"
+          id="data-mgmt-tab"
+          style="display: none"
+        >
+          <i class="fas fa-database"></i> Data Management
+        </button>
+
+        <div class="mt-12 pt-6 border-t border-gray-700 mx-4">
+          <div class="px-4 mb-4">
+            <div class="text-xs text-gray-400 mb-2">QUICK ACTIONS</div>
+            <div class="flex flex-col gap-2">
+              <button
+                onclick="switchTab('add-inspection')"
+                class="text-left text-sm text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition"
+              >
+                <i class="fas fa-plus mr-2"></i> Quick Add
+              </button>
+              <button
+                onclick="showPasswordPrompt()"
+                class="text-left text-sm text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition"
+              >
+                <i class="fas fa-lock mr-2"></i> Unlock Data Management
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vessel Management Card -->
+        <div class="mt-12 pt-6 border-t border-gray-700 mx-4">
+          <div
+            class="card"
+            style="
+              background: rgba(255, 255, 255, 0.05);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+            "
+          >
+            <h3 class="text-lg font-semibold mb-4 text-white">
+              Vessel Management
+            </h3>
+            <div class="mb-4">
+              <p class="text-gray-300 mb-4">
+                Add all missing vessels at once with auto-generated TC codes.
+              </p>
+              <button onclick="bulkAddVessels()" class="btn btn-primary w-full">
+                <i class="fas fa-plus-circle mr-2"></i> Add All Missing Vessels
+              </button>
+            </div>
+
+            <div class="mt-6">
+              <h4 class="font-semibold mb-3 text-white">
+                Current Vessels List
+              </h4>
+              <div class="bg-gray-800 rounded-lg p-4 max-h-60 overflow-y-auto">
+                <div id="vessel-list-container" class="grid grid-cols-1 gap-2">
+                  <!-- Vessels will be listed here by JavaScript -->
+                </div>
+              </div>
+              <p id="vessel-count" class="text-sm text-gray-300 mt-2">
+                Total: 0 vessels
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Dashboard Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">
+          Vetting Inspection Management
+        </h1>
+        <p class="text-gray-500">
+          Professional platform for managing and analyzing vessel inspection
+          data
+        </p>
+      </div>
+
+      <!-- Dashboard Tab -->
+      <div id="dashboard" class="tab-content">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">All Inspections</h2>
+            <p class="section-subtitle">
+              Monitor and manage all inspection records
+            </p>
+          </div>
+          <div class="flex gap-2">
+            <button id="export-dashboard-btn" class="btn btn-secondary">
+              <i class="fas fa-download"></i> Export
+            </button>
+            <button id="sync-cloud-btn" class="btn btn-success">
+              <i class="fas fa-cloud-upload-alt"></i> Sync
+            </button>
+            <button id="refresh-dashboard-btn" class="btn btn-primary">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div id="sync-status" class="mb-4">
+          <div class="flex items-center gap-2 text-sm">
+            <div
+              id="sync-indicator"
+              class="w-3 h-3 rounded-full bg-gray-400"
+            ></div>
+            <span id="sync-status-text" class="text-gray-600"
+              >Checking connection...</span
+            >
+            <span id="sync-details" class="text-gray-400 text-xs ml-2"></span>
+          </div>
+        </div>
+
+        <div class="card mb-6">
+          <div class="search-container mb-4">
+            <i class="fas fa-search"></i>
+            <input
+              type="text"
+              id="filter-text"
+              placeholder="Search by vessel, oil major, inspector, port, or observation..."
+              class="form-control"
+            />
+          </div>
+          <div class="flex flex-wrap items-center gap-4">
+            <button id="apply-filter" class="btn btn-primary">
+              <i class="fas fa-filter"></i> Apply Filters
+            </button>
+            <button id="clear-filter" class="btn btn-outline">
+              <i class="fas fa-times"></i> Clear All
+            </button>
+            <div class="ml-auto flex items-center gap-4">
+              <div class="text-sm text-gray-500">
+                Showing
+                <span id="filter-count" class="font-semibold text-gray-700"
+                  >0</span
+                >
+                of
+                <span id="total-count" class="font-semibold text-gray-700"
+                  >0</span
+                >
+                inspections
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm text-gray-500">Sort:</span>
+                <select id="sort-select" class="form-control py-1 text-sm">
+                  <option value="date-desc">Date (Newest)</option>
+                  <option value="date-asc">Date (Oldest)</option>
+                  <option value="vessel">Vessel Name</option>
+                  <option value="observations">Most Observations</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Vessel / TC</th>
+                <th>Date / QTR</th>
+                <th>Oil Major</th>
+                <th>Port / Inspector</th>
+                <th class="text-center">OBS Count</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="dashboard-table-body">
+              <!-- Content will be populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Add Inspection Tab -->
+      <div id="add-inspection" class="tab-content hidden">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Add New Inspection</h2>
+            <p class="section-subtitle">
+              Complete all required fields to add a new inspection record
+            </p>
+          </div>
+        </div>
+
+        <form id="inspection-form" class="space-y-6">
+          <!-- Vessel Details -->
+          <div class="card">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              Vessel Details
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div class="form-group">
+                <label class="form-label" for="vesselName">
+                  Vessel Name *
+                </label>
+                <select id="vesselName" required class="form-control">
+                  <option value="">Select Vessel</option>
+                </select>
+                <div class="form-error" id="vesselName-error"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="tc"> Tanker Code (TC) </label>
+                <input
+                  type="text"
+                  id="tc"
+                  readonly
+                  class="form-control bg-gray-50"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="date"> Inspection Date * </label>
+                <input type="date" id="date" required class="form-control" />
+                <div class="form-error" id="date-error"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="qtr"> Quarter (QTR) </label>
+                <input
+                  type="text"
+                  id="qtr"
+                  readonly
+                  class="form-control bg-gray-50"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="oilMajor"> Oil Major * </label>
+                <input
+                  type="text"
+                  id="oilMajor"
+                  required
+                  placeholder="e.g., Shell, BP"
+                  class="form-control"
+                />
+                <div class="form-error" id="oilMajor-error"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="port"> Port * </label>
+                <input
+                  type="text"
+                  id="port"
+                  required
+                  placeholder="e.g., Rotterdam, Singapore"
+                  class="form-control"
+                />
+                <div class="form-error" id="port-error"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="inspector">
+                  Inspector Name *
+                </label>
+                <input
+                  type="text"
+                  id="inspector"
+                  required
+                  placeholder="e.g., John Smith"
+                  class="form-control"
+                />
+                <div class="form-error" id="inspector-error"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Observations Section -->
+          <div class="card">
+            <div class="flex justify-between items-center mb-6">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-800">
+                  Observations
+                </h3>
+                <p class="text-sm text-gray-500">
+                  Add inspection findings if applicable
+                </p>
+              </div>
+              <div class="flex gap-3">
+                <button type="button" id="add-obs-btn" class="btn btn-success">
+                  <i class="fas fa-plus"></i> Add Observation
+                </button>
+                <button type="button" id="mark-nil-btn" class="btn btn-outline">
+                  <i class="fas fa-check"></i> Mark as NIL
+                </button>
+              </div>
+            </div>
+
+            <div id="observations-container" class="space-y-4">
+              <!-- Observations will be added here -->
+            </div>
+
+            <div id="no-obs-message" class="text-center py-8">
+              <i class="fas fa-clipboard-check text-4xl text-gray-300 mb-4"></i>
+              <h4 class="font-medium text-gray-700 mb-2">
+                No observations added
+              </h4>
+              <p class="text-gray-500 text-sm">
+                Click "Add Observation" to include inspection findings or "Mark
+                as NIL" if there are no observations
+              </p>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="flex justify-end">
+            <button type="submit" class="btn btn-primary px-8">
+              <i class="fas fa-save mr-2"></i> Save Inspection
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Planner Tab -->
+      <div id="planner" class="tab-content hidden">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">SIRE Due Date Planner</h2>
+            <p class="section-subtitle">
+              Track upcoming inspection deadlines and priorities
+            </p>
+          </div>
+          <div class="flex gap-2">
+            <button id="export-planner-btn" class="btn btn-secondary">
+              <i class="fas fa-download"></i> Export
+            </button>
+            <button id="refresh-planner-btn" class="btn btn-primary">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div id="planner-alerts" class="mb-6"></div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Vessel</th>
+                <th>Last Inspection</th>
+                <th>Oil Major</th>
+                <th>SIRE Due Date</th>
+                <th class="text-center">Days Left</th>
+                <th>Next Window Start</th>
+                <th class="text-center">Priority</th>
+                <th class="text-center">Alert</th>
+              </tr>
+            </thead>
+            <tbody id="planner-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Monthly View Tab -->
+      <div id="monthly-view" class="tab-content hidden">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Monthly Inspection Overview</h2>
+            <p class="section-subtitle">
+              Yearly inspection history visualized by month
+            </p>
+          </div>
+          <div class="flex items-center gap-4">
+            <select id="year-select" class="form-control w-40">
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+            </select>
+            <button id="refresh-monthly-btn" class="btn btn-primary">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th rowspan="2" class="sticky left-0 bg-primary-700">Vessel</th>
+                <th colspan="2" class="text-center border-r border-primary-600">
+                  Latest Inspection
+                </th>
+                <th colspan="12" class="text-center">
+                  Inspection History by Month
+                </th>
+              </tr>
+              <tr>
+                <th>Date</th>
+                <th class="border-r border-primary-600">Oil Major</th>
+                <th>Jan</th>
+                <th>Feb</th>
+                <th>Mar</th>
+                <th>Apr</th>
+                <th>May</th>
+                <th>Jun</th>
+                <th>Jul</th>
+                <th>Aug</th>
+                <th>Sep</th>
+                <th>Oct</th>
+                <th>Nov</th>
+                <th>Dec</th>
+              </tr>
+            </thead>
+            <tbody id="monthly-view-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Observation Breakdown Tab -->
+      <div id="obs-breakdown" class="tab-content hidden">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Observation Category Breakdown</h2>
+            <p class="section-subtitle">
+              Detailed VIQ chapter distribution analysis
+            </p>
+          </div>
+          <button id="export-breakdown-btn" class="btn btn-secondary">
+            <i class="fas fa-download"></i> Export Report
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th rowspan="2" class="text-left">Vessel</th>
+                <th rowspan="2" class="text-left">Vetting Inspection</th>
+                <th rowspan="2" class="text-center">No. of Obs.</th>
+                <th colspan="11" class="text-center border-b border-gray-300">
+                  VIQ Chapter
+                </th>
+              </tr>
+              <tr>
+                <th class="text-center">2</th>
+                <th class="text-center">3</th>
+                <th class="text-center">4</th>
+                <th class="text-center">5</th>
+                <th class="text-center">6</th>
+                <th class="text-center">7</th>
+                <th class="text-center">8</th>
+                <th class="text-center">9</th>
+                <th class="text-center">10</th>
+                <th class="text-center">11</th>
+                <th class="text-center">12</th>
+              </tr>
+            </thead>
+            <tbody id="obs-breakdown-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Analysis Tab -->
+      <div id="analysis" class="tab-content hidden">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Performance Analysis</h2>
+            <p class="section-subtitle">Comprehensive analytics and insights</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <div class="card">
+            <h3 class="text-lg font-semibold mb-4">Vessel Performance</h3>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Vessel</th>
+                    <th class="text-center">Insp</th>
+                    <th class="text-center">Obs</th>
+                    <th class="text-center">Hardware</th>
+                    <th class="text-center">Process</th>
+                    <th class="text-center">Human</th>
+                    <th class="text-center">Photos</th>
+                    <th class="text-center">Avg/Insp</th>
+                  </tr>
+                </thead>
+                <tbody id="vessel-analysis-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="text-lg font-semibold mb-4">Oil Major Performance</h3>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Oil Major</th>
+                    <th class="text-center">Insp</th>
+                    <th class="text-center">Obs</th>
+                    <th class="text-center">Hardware</th>
+                    <th class="text-center">Process</th>
+                    <th class="text-center">Human</th>
+                    <th class="text-center">Photos</th>
+                    <th class="text-center">Avg/Insp</th>
+                  </tr>
+                </thead>
+                <tbody id="om-analysis-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-6">
+            Observation Category Trends
+          </h3>
+          <div class="h-80">
+            <canvas id="obsCategoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Management Tab (Hidden by default) -->
+      <div id="data-mgmt" class="tab-content hidden">
+        <!-- Password Protected Overlay -->
+        <div id="password-overlay" class="password-overlay">
+          <div class="password-form">
+            <div class="text-center mb-6">
+              <i class="fas fa-lock text-4xl text-primary-600 mb-4"></i>
+              <h3 class="text-xl font-bold text-gray-800 mb-2">
+                Protected Area
+              </h3>
+              <p class="text-gray-500">
+                Enter password to access Data Management
+              </p>
+            </div>
+            <div class="space-y-4">
+              <div>
+                <input
+                  type="password"
+                  id="password-input"
+                  placeholder="Enter password"
+                  class="form-control"
+                />
+                <div id="password-error" class="form-error"></div>
+              </div>
+              <button
+                onclick="unlockDataManagement()"
+                class="btn btn-primary w-full"
+              >
+                <i class="fas fa-unlock mr-2"></i> Unlock
+              </button>
+              <p class="text-xs text-gray-400 text-center mt-4">
+                Default password: admin
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Management Content (Hidden until unlocked) -->
+        <div id="data-management-content" class="hidden">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Data Management</h2>
+              <p class="section-subtitle">
+                Import, export, and manage inspection data
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="card">
+              <div class="flex items-center mb-6">
+                <div
+                  class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mr-4"
+                >
+                  <i class="fas fa-download text-primary-600 text-xl"></i>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold">Export Data</h3>
+                  <p class="text-gray-500 text-sm">
+                    Backup all inspection data
+                  </p>
+                </div>
+              </div>
+              <p class="text-gray-600 mb-6">
+                Export all inspection data to a JSON file for backup, sharing,
+                or analysis in other tools.
+              </p>
+              <button id="export-data-btn" class="btn btn-primary w-full">
+                <i class="fas fa-file-export"></i> Download Data (JSON)
+              </button>
+            </div>
+
+            <div class="card">
+              <div class="flex items-center mb-6">
+                <div
+                  class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4"
+                >
+                  <i class="fas fa-upload text-green-600 text-xl"></i>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold">Import Data</h3>
+                  <p class="text-gray-500 text-sm">Restore or migrate data</p>
+                </div>
+              </div>
+              <p class="text-gray-600 mb-4">
+                Upload a JSON file to replace all current inspections. This will
+                overwrite existing data.
+              </p>
+              <div class="mb-4">
+                <input
+                  type="file"
+                  id="import-file"
+                  accept=".json"
+                  class="form-control"
+                />
+              </div>
+              <button
+                id="import-data-btn"
+                class="btn btn-success w-full"
+                disabled
+              >
+                <i class="fas fa-file-import"></i> Import and Overwrite Data
+              </button>
+              <div id="import-status" class="mt-3 text-sm"></div>
+            </div>
+          </div>
+
+          <div class="card mt-8">
+            <h3 class="text-lg font-semibold mb-4">Data Management Tools</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <button id="clear-all-data-btn" class="btn btn-danger">
+                <i class="fas fa-trash-alt"></i> Clear All Data
+              </button>
+              <button id="reset-sample-btn" class="btn btn-secondary">
+                <i class="fas fa-redo"></i> Reset to Sample Data
+              </button>
+              <button id="backup-now-btn" class="btn btn-primary">
+                <i class="fas fa-save"></i> Create Backup
+              </button>
+            </div>
+          </div>
+
+          <div class="card mt-8">
+            <h3 class="text-lg font-semibold mb-4">
+              Email Alert Configuration
+            </h3>
+            <div class="space-y-4">
+              <div>
+                <label class="form-label">Alert Recipients</label>
+                <div id="email-recipients-list" class="space-y-2">
+                  <!-- Email recipients will be listed here -->
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <input
+                  type="email"
+                  id="new-email-recipient"
+                  class="form-control flex-1"
+                  placeholder="Add new email address"
+                />
+                <button onclick="addRecipient()" class="btn btn-primary">
+                  <i class="fas fa-plus"></i> Add
+                </button>
+              </div>
+              <p class="text-sm text-gray-500">
+                These email addresses will receive alert notifications for
+                expired or critical SIRE due dates.
+              </p>
+            </div>
+          </div>
+
+          <div class="card mt-8">
+            <h3 class="text-lg font-semibold mb-4">
+              Supabase Cloud Management
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <button id="sync-to-supabase-btn" class="btn btn-success">
+                <i class="fas fa-cloud-upload-alt"></i> Sync All to Cloud
+              </button>
+              <button id="pull-from-supabase-btn" class="btn btn-primary">
+                <i class="fas fa-cloud-download-alt"></i> Pull from Cloud
+              </button>
+              <button id="clear-supabase-btn" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Clear Cloud Data
+              </button>
+            </div>
+            <div id="supabase-status" class="mt-4 text-sm"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for View/Edit Inspection -->
+    <div id="modal-backdrop" class="modal-backdrop hidden">
+      <div class="modal-content">
+        <div
+          class="p-6 border-b flex justify-between items-center bg-gradient-to-r from-primary-600 to-primary-700 text-white"
+        >
+          <div>
+            <h3 id="modal-title" class="text-xl font-bold"></h3>
+            <p id="modal-subtitle" class="text-primary-100 text-sm mt-1"></p>
+          </div>
+          <button
+            id="close-modal-btn"
+            class="text-white hover:text-primary-200 text-2xl"
+          >
+            &times;
+          </button>
+        </div>
+        <div id="modal-content" class="p-6 max-h-[60vh] overflow-y-auto"></div>
+        <div
+          id="modal-actions"
+          class="p-6 border-t flex justify-end gap-3"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+      <i id="toast-icon" class="fas fa-info-circle"></i>
+      <span id="toast-message"></span>
+    </div>
+  </body>
+</html>
